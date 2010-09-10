@@ -22,6 +22,6 @@ Eclipse.  NOTE: will become obsolete when Titanium mobile's android_native_refac
 branch is pulled into master branch, because there will then be many changes that
 affect the ability to pull the project into Eclipse.  I'll need to update it then.
 
-For details on Titanium, please see <http://www.appcelerator.com>.
+For details on Titanium, please see http://www.appcelerator.com.
 
 
