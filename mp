@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
- * tidevtools
+ * tidevtools 'mp' - create a Titanium Mobile Project
+ *
  * Copyright (c) 2010 by Bill Dawson
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
@@ -28,85 +29,34 @@ if len(sys.argv) < 2:
 	print "Usage: %s <name>" % os.path.basename(sys.argv[0])
 	sys.exit(1)
 
+this_path = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
+
+sys.path.append(this_path)
+try:
+	import ticommon
+except:
+	print "Couldn't load ticommon from %s.  It should be sitting side-by-side with this script.  Message: &%s." % (this_path, err)
+	sys.exit(1)
+
+
 project_name = sys.argv[1]
+isWindows = ticommon.is_windows()
+tidev_db = ticommon.find_ti_dev_db()
 
-isWindows = 'USERPROFILE' in env
-
-# Find the Titanium Developer Sqlite database
-tidev_db = ''
-# only works for win7 at the moment
-if isWindows:
-	tidev_db = os.path.join(env['USERPROFILE'], 'AppData', 'Roaming')
-else:
-	tidev_db = os.path.join(os.path.expanduser('~/Library'), 'Application Support')
-
-tidev_db = os.path.join(tidev_db, 'Titanium', 'appdata', 'com.appcelerator.titanium.developer', 'app_com.appcelerator.titanium.developer_0', '0000000000000001.db')
-
-if not os.path.exists(tidev_db):
-	print "I couldn't find your Titanium Developer sqlite db.  I looked in %s." % tidev_db
+if len(tidev_db) == 0:
+	print "I couldn't find your Titanium Developer sqlite db."
 	sys.exit(1)
 
 # Find the Titanium SDK
-tisdk_path = ''
-if not isWindows:
-	tisdk_path = os.path.join('/', 'Library', 'Application Support', 'Titanium', 'mobilesdk', 'osx')
-else:
-	# win7
-	tisdk_path = os.path.join('C:\\', 'ProgramData', 'Titanium', 'mobilesdk', 'win32')
-	if not os.path.exists(tisdk_path):
-		# try xp
-		tisdk_path = os.path.join('C:\\', 'Documents and Settings', 'All Users', 'Application Data', 'Titanium', 'mobilesdk', 'win32')
-
-if not os.path.exists(tisdk_path):
-	print "I wanted to find titanium in %s but it's not there.  I'm confused and going home." % tisdk_path
+tisdk_path, sdkver = ticommon.find_ti_sdk()
+if len(tisdk_path) == 0 or not os.path.exists(tisdk_path):
+	print "I couldn't find the Titanium Mobile SDK"
 	sys.exit(1)
-
-sdkver = ''
-# hunt for the latest sdk simply by mod date of version folders
-subs = os.listdir(tisdk_path)
-if not subs:
-	print "I couldn't find any subdirectories of %s." % tisdk_pat
-	sys.exit(1)
-subdirs = [s for s in subs if os.path.isdir(os.path.join(tisdk_path, s))]
-subdirs = [s for s in subdirs if os.path.exists(os.path.join(tisdk_path, s, 'README'))]
-maxtime = None
-for onedir in subdirs:
-	thistime = os.path.getmtime(os.path.join(tisdk_path, onedir))
-	if maxtime is None:
-		sdkver = onedir
-		maxtime = thistime
-	else:
-		if thistime > maxtime:
-			sdkver = onedir
-			maxtime = thistime
-
-tisdk_path = os.path.join(tisdk_path, sdkver)
 
 print "Found Titanium SDK at %s" % tisdk_path
 
-android_sdk = ''
-android_sdk_check = []
-if not isWindows:
-	android_sdk_check = ['/opt/android-sdk-mac_86', '/opt/android-sdk', 
-			os.path.expanduser('~/android-sdk-mac_86'),
-			os.path.expanduser('~/android-sdk')]
-	for onecheck in android_sdk_check:
-		if os.path.exists(onecheck):
-			android_sdk = onecheck
-			break
-else:
-	android_sdk_check = ['C:\\android-sdk-win_32', 'C:\\android-sdk']
-	for onecheck in android_sdk_check:
-		if os.path.exist(onecheck):
-			android_sdk = onecheck
-			break
-
-if len(android_sdk) == 0:
-	if "ANDROID_SDK" in env:
-		if os.path.exists(env['ANDROID_SDK']):
-			android_sdk = env['ANDROID_SDK']
-
-if len(android_sdk) == 0:
+android_sdk = ticommon.find_android_sdk()
+if len(android_sdk) == 0 or not os.path.exists(android_sdk):
 	print "Could not find your android sdk folder.  Avoid this in the future by making an ANDROID_SDK env var"
 	sys.exit(1)
 

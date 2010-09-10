@@ -10,6 +10,12 @@ I wrote it feverishly today (09 Sep 2010) because I'm getting so tired of typing
 all those fields when I create a new mobile project in Titanium Developer.  I create
 a lot of projects to test trouble tickets, new features, etc.  
 
+UPDATE: 
+Now includes also 'ec', to make a Titanium mobile project ready to be imported to
+Eclipse.  NOTE: will become obsolete when Titanium mobile's android_native_refactor
+branch is pulled into master branch, because there will then be many changes that
+affect the ability to pull the project into Eclipse.  I'll need to update it then.
+
 For details on Titanium, please see <http://www.appcelerator.com>.
 
 
