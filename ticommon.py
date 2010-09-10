@@ -80,7 +80,7 @@ def find_android_sdk():
 	else:
 		android_sdk_check = ['C:\\android-sdk-win_32', 'C:\\android-sdk']
 		for onecheck in android_sdk_check:
-			if os.path.exist(onecheck):
+			if os.path.exists(onecheck):
 				android_sdk = onecheck
 				break
 

@@ -119,3 +119,4 @@ conn.execute(sql, values)
 conn.commit()
 conn.close()
 
+os.chdir(project_folder)
