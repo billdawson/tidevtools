@@ -1,0 +1,15 @@
+tidevtools from Bill Dawson
+
+So far only 'mp', a python script to make a Titanium mobile project.  Tested only on OS X.
+Just give it a project name and it sets up the project folders and makes the entry in the sqlite
+database maintained by Titanium Developer so that you'll see the project next time you open Developer.
+
+One long piece of non-modular python code!
+
+I wrote it feverishly today (09 Sep 2010) because I'm getting so tired of typing in 
+all those fields when I create a new mobile project in Titanium Developer.  I create
+a lot of projects to test trouble tickets, new features, etc.  
+
+For details on Titanium, please see <http://www.appcelerator.com>.
+
+
