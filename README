@@ -4,11 +4,17 @@ So far only 'mp', a python script to make a Titanium mobile project.  Tested onl
 Just give it a project name and it sets up the project folders and makes the entry in the sqlite
 database maintained by Titanium Developer so that you'll see the project next time you open Developer.
 
-One long piece of non-modular python code!
+NOTE: Update the top CONSTANTS in the 'mp' script so they point to relevant stuff for you. E.g.,
+
+PROJECT_ID_PREFIX = 'com.billdawson.'
+PROJECT_FOLDER = '/Users/bill/projects/ti'
+PUBLISHER = 'bill'
+PUBLISHER_URL = 'billdawson.com'
 
 I wrote it feverishly today (09 Sep 2010) because I'm getting so tired of typing in 
 all those fields when I create a new mobile project in Titanium Developer.  I create
 a lot of projects to test trouble tickets, new features, etc.  
+
 
 UPDATE: 
 Now includes also 'ec', to make a Titanium mobile project ready to be imported to
