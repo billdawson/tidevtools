@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- * tidevtools 'mp' - create a Titanium Mobile Project
+ * tidevtools 'ti_makeproj' - create a Titanium Mobile Project
  *
  * Copyright (c) 2010 by Bill Dawson
  * Licensed under the terms of the Apache Public License
@@ -11,7 +11,7 @@
  * be sure to create a tidevtools_settings.py file in this same 
  * folder and override the values for the "constants" you see below.
 """
-print "tidevtools 'mp'"
+print "tidevtools 'ti_makeproj'"
 
 import sys, os, uuid, re, sqlite3, time, datetime, subprocess, shutil
 from os import environ as env
@@ -19,13 +19,13 @@ from os import environ as env
 ############## DEFAULTS ########################
 # Put a file named tidevtools_settings.py in the 
 # same folder as this file, then you can override all of these
-PROJECT_ID_PREFIX = 'com.billdawson.'
-PROJECT_FOLDER = '/Users/bill/projects/ti'
-PUBLISHER = 'bill'
-PUBLISHER_URL = 'billdawson.com'
+PROJECT_ID_PREFIX = '' # e.g., com.billdawson.
+PROJECT_FOLDER = '' # e.g., /Users/bill/projects/ti
+PUBLISHER = '' # e.g., Bill Dawson
+PUBLISHER_URL = '' # e.g., billdawson.com
 DISABLE_ANALYTICS = True
 ENABLE_ANDROID_DEBUG = True
-EXEC_AT_END = [] # arglist for Popen
+EXEC_AT_END = [] # arglist for Popen, e.g. ['mvim', '--cmd', 'cd %project_folder%']
 #################################################
 ANDROID_DEBUG = '<property type="bool" name="ti.android.debug">true</property>'
 
@@ -51,6 +51,10 @@ except:
 
 if os.path.exists(os.path.join(this_path, 'tidevtools_settings.py')):
 	execfile(os.path.join(this_path, 'tidevtools_settings.py'))
+
+if not PROJECT_ID_PREFIX or not PROJECT_FOLDER or not PUBLISHER or not PUBLISHER_URL:
+	print 'You need to fill in PROJECT_ID_PREFIX and all that.  Use a file named tidevtools_settings.py'
+	sys.exit(1)
 
 project_name = sys.argv[1]
 project_folder = os.path.join(PROJECT_FOLDER, project_name)

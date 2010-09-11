@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- * tidevtools 'ec' - Prepare a Titanium mobile project folder
+ * tidevtools 'ti_eclipsify' - Prepare a Titanium mobile project folder
  * for importing into Eclipse.
  *
  * Copyright (c) 2010 by Bill Dawson
@@ -10,7 +10,7 @@
  *
  * Just run this script at the top of a project folder.
 """
-print "tidevtools 'ec'"
+print "tidevtools 'ti_eclipsify'"
 
 import sys, os, platform, shutil
 from os import environ as env

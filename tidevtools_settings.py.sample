@@ -1,0 +1,20 @@
+PROJECT_ID_PREFIX = 'com.billdawson.'
+PROJECT_FOLDER = '/Users/bill/projects/ti'
+PUBLISHER = 'Bill Dawson'
+PUBLISHER_URL = 'billdawson.com'
+DISABLE_ANALYTICS = True
+ENABLE_ANDROID_DEBUG = True
+EXEC_AT_END = ['mvim', '--cmd', 'cd %project_folder%', '-c', 'NERDTree']
+
+"""
+NOTES:
+The EXEC_AT_END is used to launch a process using python's 
+subprocess.Popen.  In my example, I'm launching mvim (MacVim) and
+telling it to immediately change directory to the project folder 
+that was created, then to run the command (inside vim) "NERDTree", which
+launches the excellent NERDTree plugin.
+
+Tokens like %project_folder% are replaced with the value of a variable with
+that name in the global scope in the python script (study ti_makeproj to see
+what's available.)
+"""
