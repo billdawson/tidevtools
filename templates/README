@@ -1,1 +1,3 @@
+These are just examples (and a place for me to put my own templates under source control.)
+
 Each subfolder here represents one "template" -- a set of files/folders to be put into the Resources folder of a Titanium mobile project that you create using the 'mp' tool.  If 'mp' finds a 'templates' folder below your PROJECT_FOLDER folder, it will prompt you to select a template for your new project.
