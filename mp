@@ -7,27 +7,38 @@
  * Please see the LICENSE included with this distribution for details.
  * http://github.com/billdawson/tidevtools
  *
- * So just pass it a project name, it'll do the rest.  But first change the variables 
- * ("constants") below in the "CUSTOMIZE HERE" section. 
+ * So just pass it a project name, it'll do the rest.  But first 
+ * be sure to create a tidevtools_settings.py file in this same 
+ * folder and override the values for the "constants" you see below.
 """
 print "tidevtools 'mp'"
 
-import sys, os, uuid, re, sqlite3, time, datetime
+import sys, os, uuid, re, sqlite3, time, datetime, subprocess, shutil
 from os import environ as env
 
-######### CUSTOMIZE HERE ########################
+############## DEFAULTS ########################
+# Put a file named tidevtools_settings.py in the 
+# same folder as this file, then you can override all of these
 PROJECT_ID_PREFIX = 'com.billdawson.'
 PROJECT_FOLDER = '/Users/bill/projects/ti'
 PUBLISHER = 'bill'
 PUBLISHER_URL = 'billdawson.com'
 DISABLE_ANALYTICS = True
 ENABLE_ANDROID_DEBUG = True
+EXEC_AT_END = [] # arglist for Popen
 #################################################
 ANDROID_DEBUG = '<property type="bool" name="ti.android.debug">true</property>'
 
+simulation = False
+no_db = False
 if len(sys.argv) < 2:
 	print "Usage: %s <name>" % os.path.basename(sys.argv[0])
 	sys.exit(1)
+
+if len(sys.argv) > 2:
+	argstring = ' '.join(sys.argv)
+	simulation = '--simulate' in argstring
+	no_db = '--nodb' in argstring
 
 this_path = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
 
@@ -38,8 +49,16 @@ except:
 	print "Couldn't load ticommon from %s.  It should be sitting side-by-side with this script.  Message: &%s." % (this_path, err)
 	sys.exit(1)
 
+if os.path.exists(os.path.join(this_path, 'tidevtools_settings.py')):
+	execfile(os.path.join(this_path, 'tidevtools_settings.py'))
 
 project_name = sys.argv[1]
+project_folder = os.path.join(PROJECT_FOLDER, project_name)
+resources_folder = os.path.join(project_folder, 'Resources')
+if os.path.exists(project_folder):
+	print "%s already exists." % project_folder
+	sys.exit(1)
+
 isWindows = ticommon.is_windows()
 tidev_db = ticommon.find_ti_dev_db()
 
@@ -73,50 +92,116 @@ else:
 	args.extend(('iphone', 'android'))
 args.append(android_sdk)
 
-run.run(args)
+if not simulation:
+	run.run(args)
+else:
+	print "SIMULATION - Would have run %s" % " ".join(args)
 
 guid = unicode(uuid.uuid4())
 
-project_folder = os.path.join(PROJECT_FOLDER, project_name)
-f = open(os.path.join(project_folder, 'tiapp.xml'), 'r')
-tiappxml = f.read()
-f.close()
+if not simulation:
+	f = open(os.path.join(project_folder, 'tiapp.xml'), 'r')
+	tiappxml = f.read()
+	f.close()
 
-p = re.compile('<guid>(.*)</guid>')
-tiappxml = p.sub('<guid>' + guid + '</guid>', tiappxml)
+	p = re.compile('<guid>(.*)</guid>')
+	tiappxml = p.sub('<guid>' + guid + '</guid>', tiappxml)
 
-if DISABLE_ANALYTICS:
-	p = re.compile('<analytics>true</analytics>')
-	tiappxml = p.sub('<analytics>false</analytics>', tiappxml)
+	if DISABLE_ANALYTICS:
+		p = re.compile('<analytics>true</analytics>')
+		tiappxml = p.sub('<analytics>false</analytics>', tiappxml)
 
-if ENABLE_ANDROID_DEBUG:
-	p = re.compile('<icon>')
-	tiappxml = p.sub(ANDROID_DEBUG + '\n<icon>', tiappxml)
+	if ENABLE_ANDROID_DEBUG:
+		p = re.compile('<icon>')
+		tiappxml = p.sub(ANDROID_DEBUG + '\n<icon>', tiappxml)
 
-f = open(os.path.join(project_folder, 'tiapp.xml'), 'w')
-f.write(tiappxml)
-f.close()
+	f = open(os.path.join(project_folder, 'tiapp.xml'), 'w')
+	f.write(tiappxml)
+	f.close()
+else:
+	print "SIMULATION - Would open the new tiapp.xml file, change the guid, etc."
 
 # sqlite
-conn = sqlite3.connect(tidev_db)
-rows = conn.execute('select max(id) from projects')
-for r in rows:
-	pass
-dbid = r[0] + 1
+if not simulation and not no_db:
+	conn = sqlite3.connect(tidev_db)
+	rows = conn.execute('select max(id) from projects')
+	for r in rows:
+		pass
+	dbid = r[0] + 1
 
-sql = """
-INSERT INTO projects (id, type, guid, runtime, description, timestamp,
-name, directory, appid, publisher, url, image, version, copyright)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+	sql = """
+	INSERT INTO projects (id, type, guid, runtime, description, timestamp,
+	name, directory, appid, publisher, url, image, version, copyright)
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
 
-timestamp = time.mktime(time.localtime())
-copyright = "%s by %s" % (datetime.datetime.now().year, PUBLISHER);
+	timestamp = time.mktime(time.localtime())
+	copyright = "%s by %s" % (datetime.datetime.now().year, PUBLISHER);
 
-values = (dbid, 'mobile', guid, sdkver, "No description provided", timestamp,
-		project_name, project_folder, project_id, PUBLISHER, PUBLISHER_URL, 
-		'appicon.png', '1.0', copyright)
-conn.execute(sql, values)
-conn.commit()
-conn.close()
+	values = (dbid, 'mobile', guid, sdkver, "No description provided", timestamp,
+			project_name, project_folder, project_id, PUBLISHER, PUBLISHER_URL, 
+			'appicon.png', '1.0', copyright)
+	conn.execute(sql, values)
+	conn.commit()
+	conn.close()
+else:
+	print "SIMULATION - Would create an entry in the Titanium Developer Sqlite database"
 
-os.chdir(project_folder)
+# Base the project on a template?
+template_folder = os.path.join(PROJECT_FOLDER, 'templates')
+template = ''
+if os.path.exists(template_folder):
+	templates = [d for d in os.listdir(template_folder) if os.path.isdir(os.path.join(template_folder, d))]
+	print '\nChoose a template or just hit enter to use titanium default:\n'
+	for i in range(0, len(templates)):
+		print '%s\t%s\n' % (i, templates[i])
+	choice = raw_input('Make your selection: ')
+	if not choice:
+		print 'Sticking with default'
+	else:
+		try:
+			choice = int(choice)
+			if choice >= len(templates):
+				print 'Invalid choice ignored'
+			else:
+				template = templates[choice]
+		except Exception, err:
+			print 'Failed to read your choice: %s' % err
+		if template:
+			print 'You selected the "%s" template' % template
+			template_folder = os.path.join(template_folder, template)
+			if simulation:
+				print "SIMULATION - Would copy files from %s to %s" % (template_folder, resources_folder)
+			else:
+				for root, dirs, files in os.walk(template_folder):
+					for f in files:
+						orig = os.path.join(root, f)
+						orig_rel = orig.replace(template_folder,'')
+						if orig_rel.startswith(os.sep):
+							orig_rel = orig_rel[1:]
+						dest = os.path.join(resources_folder, orig_rel)
+						if not os.path.exists(os.path.dirname(dest)):
+							os.makedirs(os.path.dirname(dest))
+						print "Copying %s -> %s" % (orig, dest)
+						shutil.copy(orig, dest)
+
+def replace_tokens(input):
+	result = []
+	pattern = r"(%\S+%)"
+	for item in input:
+		newitem = item
+		tokens = re.findall(pattern, newitem)
+		if tokens:
+			for token in tokens:
+				if token.replace('%', '') in globals():
+					newitem = newitem.replace(token, globals()[token.replace('%', '')])
+		result.append(newitem)
+	return result
+
+if EXEC_AT_END:
+	if not simulation:
+		subprocess.Popen(replace_tokens(EXEC_AT_END))
+	else:
+		print "SIMULATION - Would have run %s" % " ".join(replace_tokens(EXEC_AT_END))
+	
+
+print 'Done'
