@@ -8,7 +8,7 @@
  * http://github.com/billdawson/tidevtools
  *
 """
-import os, sys, platform
+import os, sys, platform, re
 from os import environ as env
 
 def is_windows():
@@ -89,4 +89,22 @@ def find_android_sdk():
 			if os.path.exists(env['ANDROID_SDK']):
 				android_sdk = env['ANDROID_SDK']
 	return android_sdk
+
+def appid_to_path(appid):
+	return os.sep.join(appid.split('.'))
+
+def get_appid(project_root):
+	tiapp = os.path.join(os.path.join(project_root, 'tiapp.xml'))
+	if not os.path.exists(tiapp):
+		raise Exception('%s does not exist' % tiapp)
+	f = open(tiapp, 'r')
+	xml =f.read()
+	f.close()
+	match = re.search(r"<id>(.*)</id>", xml)
+	if match and match.groups() and len(match.groups()):
+		return match.groups()[0]
+
+def ti_module_exists(module):
+	tisdk = find_ti_sdk()[0]
+	return os.path.exists(os.path.join(tisdk, 'android', 'modules', '%s.jar' % module))
 

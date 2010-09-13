@@ -53,14 +53,19 @@ assets_folder = os.path.join(android_folder,'assets')
 if not os.path.exists(assets_folder):
 	os.mkdir(assets_folder)
 
-src_folder = os.path.join(android_folder, 'src')
-if (os.path.exists(src_folder)):
-	for root, dirs, files in os.walk(src_folder):
-		for name in files:
-			if name == 'R.java':
-				os.remove(os.path.join(root, name))
-				print 'Deleted R.java'
+appid = ticommon.get_appid('.')
 
+gen_folder =os.path.join(android_folder, 'gen', ticommon.appid_to_path(appid))
+if not os.path.exists(gen_folder):
+	os.makedirs(gen_folder)
+	print "Created %s" % gen_folder
+
+src_folder = os.path.join(android_folder, 'src', ticommon.appid_to_path(appid))
+r_file = os.path.join(src_folder, 'R.java')
+if os.path.exists(r_file):
+	shutil.copyfile(r_file, os.path.join(gen_folder, 'R.java'))
+	os.remove(r_file)
+	print 'Moved R.java to "gen" folder'
 
 if isWindows:
 	print "Copying Resources and tiapp.xml to assets folder because you're running Windows and therefore we're not going to make symlinks"
@@ -101,6 +106,17 @@ cpath_additions = """
 <classpathentry kind="lib" path="lib/js.jar"/>
 """
 cpath_additions = cpath_additions.split('\n')
+if ticommon.ti_module_exists('titanium-contacts'):
+	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-contacts"/>')
+
+if ticommon.ti_module_exists('titanium-calendar'):
+	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-calendar"/>')
+
+if ticommon.ti_module_exists('titanium-bump'):
+	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-bump"/>')
+
+if ticommon.ti_module_exists('titanium-android'):
+	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-android"/>')
 
 cpath = os.path.join(android_folder, '.classpath')
 if os.path.exists(cpath):
