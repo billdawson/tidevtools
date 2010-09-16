@@ -1,27 +1,13 @@
 tidevtools from Bill Dawson
 
-So far only 'mp', a python script to make a Titanium mobile project.  Tested only on OS X.
-Just give it a project name and it sets up the project folders and makes the entry in the sqlite
-database maintained by Titanium Developer so that you'll see the project next time you open Developer.
+Includes a script to make a project, and a script to "eclipsify" a project.
 
-NOTE: Update the top CONSTANTS in the 'mp' script so they point to relevant stuff for you. E.g.,
+Here's how I use it, and I recommend you do too:
 
-PROJECT_ID_PREFIX = 'com.billdawson.'
-PROJECT_FOLDER = '/Users/bill/projects/ti'
-PUBLISHER = 'bill'
-PUBLISHER_URL = 'billdawson.com'
-
-I wrote it feverishly today (09 Sep 2010) because I'm getting so tired of typing in 
-all those fields when I create a new mobile project in Titanium Developer.  I create
-a lot of projects to test trouble tickets, new features, etc.  
-
-
-UPDATE: 
-Now includes also 'ec', to make a Titanium mobile project ready to be imported to
-Eclipse.  NOTE: will become obsolete when Titanium mobile's android_native_refactor
-branch is pulled into master branch, because there will then be many changes that
-affect the ability to pull the project into Eclipse.  I'll need to update it then.
-
-For details on Titanium, please see http://www.appcelerator.com.
-
-
+1) Clone this repository.
+2) Copy tidevtools_settings.py.sample -> tidevtools_settings.py.
+3) Open tidevtools_settings.py and change the values -- I think they're self-explanatory.
+4) chmod +x *.py
+5) Make life easy on yourself and make some alias.  I do this...
+alias mp="/Users/bill/projects/tidevtools/ti_makeproj.py"
+alias ec="/Users/bill/projects/tidevtools/ti_eclipsify.py"
