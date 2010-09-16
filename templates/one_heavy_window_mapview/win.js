@@ -1,3 +1,4 @@
+/*global Ti, Titanium, alert, JSON */
 var win = Ti.UI.currentWindow;
 var mapview = Titanium.Map.createView({
     mapType: Titanium.Map.STANDARD_TYPE,
