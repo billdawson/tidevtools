@@ -45,8 +45,8 @@ this_path = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename)
 sys.path.append(this_path)
 try:
 	import ticommon
-except:
-	print "Couldn't load ticommon from %s.  It should be sitting side-by-side with this script.  Message: &%s." % (this_path, err)
+except Exception, err:
+	print "Couldn't load ticommon from %s.  It should be sitting side-by-side with this script.  Message: %s." % (this_path, err)
 	sys.exit(1)
 
 if os.path.exists(os.path.join(this_path, 'tidevtools_settings.py')):
