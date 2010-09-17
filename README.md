@@ -11,8 +11,11 @@ Suggested Steps To Use It
 - Open tidevtools_settings.py and change the values -- I think they're self-explanatory.
 - chmod +x *.py
 - Make life easy on yourself and make some aliases.  I do this...
+
+@@@
 alias mp="/Users/bill/projects/tidevtools/ti_makeproj.py"
 alias ec="/Users/bill/projects/tidevtools/ti_eclipsify.py"
+@@@
 
 Usage Instructions
 -------------------
