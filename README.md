@@ -12,8 +12,9 @@ Suggested Steps To Use It
 - chmod +x *.py
 - Make life easy on yourself and make some aliases.  I do this...
 
-	alias mp="/Users/bill/projects/tidevtools/ti_makeproj.py"
-	alias ec="/Users/bill/projects/tidevtools/ti_eclipsify.py"
+     alias mp="/Users/bill/projects/tidevtools/ti_makeproj.py"
+
+     alias ec="/Users/bill/projects/tidevtools/ti_eclipsify.py"
 
 Usage Instructions
 -------------------
