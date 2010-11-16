@@ -10,24 +10,41 @@
 """
 import os, sys, platform, re
 from os import environ as env
+from xml.dom.minidom import parse, Node
+
+def is_linux():
+	return platform.system() == 'Linux'
 
 def is_windows():
 	p = platform.system()
-	return ('indows' in p or 'CYGWIN' in p)
+	return p == 'Windows' or 'CYGWIN' in p
+
+def is_osx():
+	return platform.system() == 'Darwin'
 
 def find_ti_sdk():
 	"""Returns a tuple (path, version).  Path goes all the way down to the version"""
-	isWindows = is_windows()
 	tisdk_path = ''
 	sdkver = ''
-	if not isWindows:
+	if is_osx():
 		tisdk_path = os.path.join('/', 'Library', 'Application Support', 'Titanium', 'mobilesdk', 'osx')
+	elif is_linux():
+		tisdk_path = os.path.expanduser(os.path.join('~', '.titanium', 'mobilesdk', 'linux'))
 	else:
 		# win7
 		tisdk_path = os.path.join('C:\\', 'ProgramData', 'Titanium', 'mobilesdk', 'win32')
 		if not os.path.exists(tisdk_path):
 			# try xp
 			tisdk_path = os.path.join('C:\\', 'Documents and Settings', 'All Users', 'Application Data', 'Titanium', 'mobilesdk', 'win32')
+
+	# let environment override
+	if 'TI_DEV_SDK' in os.environ:
+		ti_dev_sdk = os.environ['TI_DEV_SDK']
+		if os.path.exists(ti_dev_sdk):
+			version = os.path.basename(ti_dev_sdk)
+			return (ti_dev_sdk, version)
+		else:
+			print 'Warning: TI_DEV_SDK is set, but the path doesn\'t exist'
 
 	if os.path.exists(tisdk_path):
 		sdkver = ''
@@ -50,6 +67,7 @@ def find_ti_sdk():
 					maxtime = thistime
 
 		tisdk_path = os.path.join(tisdk_path, sdkver)
+		
 	return (tisdk_path, sdkver)
 
 def find_ti_dev_db():
@@ -93,8 +111,28 @@ def find_android_sdk():
 def appid_to_path(appid):
 	return os.sep.join(appid.split('.'))
 
+def get_node_text(nodelist):
+	rc = []
+	for node in nodelist:
+		if node.nodeType == node.TEXT_NODE:
+			rc.append(node.data)
+	return ''.join(rc)
+
+def get_app_info(project_root):
+	tiapp_xml = os.path.join(os.path.join(project_root, 'tiapp.xml'))
+	if not os.path.exists(tiapp_xml):
+		raise Exception('%s does not exist' % tiapp_xml)
+	tiapp = parse(tiapp_xml)
+	root = tiapp.documentElement
+	app_info = {}
+	for element in root.childNodes:
+		if element.nodeType != Node.ELEMENT_NODE: continue
+		app_info[element.nodeName] = get_node_text(element.childNodes);
+	return app_info
+
 def get_appid(project_root):
-	tiapp = os.path.join(os.path.join(project_root, 'tiapp.xml'))
+	return get_app_info(project_root)['id']
+	"""tiapp = os.path.join(os.path.join(project_root, 'tiapp.xml'))
 	if not os.path.exists(tiapp):
 		raise Exception('%s does not exist' % tiapp)
 	f = open(tiapp, 'r')
@@ -102,7 +140,7 @@ def get_appid(project_root):
 	f.close()
 	match = re.search(r"<id>(.*)</id>", xml)
 	if match and match.groups() and len(match.groups()):
-		return match.groups()[0]
+		return match.groups()[0]"""
 
 def ti_module_exists(module):
 	tisdk = find_ti_sdk()[0]
