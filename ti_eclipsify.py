@@ -26,7 +26,7 @@ except:
 
 isWindows = ticommon.is_windows()
 
-JARS_NEEDED = ('commons-codec-1.3.jar', 'jaxen-1.1.1.jar', 'js.jar')
+JARS_NEEDED = ('ti-commons-codec-1.3.jar', 'jaxen-1.1.1.jar', 'smalljs.jar')
 TITANIUM_THEME="""<?xml version="1.0" encoding="utf-8"?>
 <resources>
 <style name="Theme.Titanium" parent="android:Theme">
@@ -101,9 +101,9 @@ cpath_additions = """
 <classpathentry combineaccessrules="false" kind="src" path="/titanium-utils"/>
 <classpathentry combineaccessrules="false" kind="src" path="/titanium-xml"/>
 <classpathentry combineaccessrules="false" kind="src" path="/titanium-yahoo"/>
-<classpathentry kind="lib" path="lib/commons-codec-1.3.jar"/>
+<classpathentry kind="lib" path="lib/ti-commons-codec-1.3.jar"/>
 <classpathentry kind="lib" path="lib/jaxen-1.1.1.jar"/>
-<classpathentry kind="lib" path="lib/js.jar"/>
+<classpathentry kind="lib" path="lib/smalljs.jar"/>
 """
 cpath_additions = cpath_additions.split('\n')
 if ticommon.ti_module_exists('titanium-contacts'):
@@ -117,6 +117,9 @@ if ticommon.ti_module_exists('titanium-bump'):
 
 if ticommon.ti_module_exists('titanium-android'):
 	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-android"/>')
+	# if that's there then so is the localization one.
+	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-i18n"/>')
+
 
 cpath = os.path.join(android_folder, '.classpath')
 if os.path.exists(cpath):
@@ -199,6 +202,16 @@ if not os.path.exists(os.path.join(drawable_folder, 'background.png')):
 		if os.path.exists(os.path.join(tisdk, 'android', 'resources', 'default.png')):
 			shutil.copy(os.path.join(tisdk, 'android', 'resources', 'default.png'), os.path.join(drawable_folder, 'background.png'))
 			print 'Copied over default.png to res/drawables/background.png'
+
+# put debuggable=true in manifest so you can do phone debugging
+import codecs, re
+f = codecs.open(os.path.join(android_folder, 'AndroidManifest.xml'), 'r', 'utf-8')
+xml = f.read()
+f.close()
+xml = re.sub(r'android\:debuggable="false"', 'android:debuggable="true"', xml)
+f = codecs.open(os.path.join(android_folder, 'AndroidManifest.xml'), 'w', 'utf-8')
+f.write(xml)
+
 
 
 print "Done."
