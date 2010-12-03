@@ -37,6 +37,9 @@ id = appInfo['id']
 
 command = 'build'
 
+if len(sys.argv) > 1:
+	command = sys.argv[1]
+
 if command == 'generate':
 	androidScript = os.path.join(tiDevSDK, 'android', 'android.py')
 	args = [sys.executable, androidScript, name, id, os.path.dirname(projectPath), androidSDK]
