@@ -37,15 +37,6 @@ id = appInfo['id']
 
 command = 'build'
 
-touch_tiapp = False
-
-if len(sys.argv) > 1:
-	command = sys.argv[1]
-	touch_tiapp = sys.argv[-1] == '--touch'
-
-if touch_tiapp:
-	os.utime(tiappXML, None)
-
 if command == 'generate':
 	androidScript = os.path.join(tiDevSDK, 'android', 'android.py')
 	args = [sys.executable, androidScript, name, id, os.path.dirname(projectPath), androidSDK]
