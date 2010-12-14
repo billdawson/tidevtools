@@ -26,7 +26,7 @@ except:
 
 isWindows = ticommon.is_windows()
 
-JARS_NEEDED = ('ti-commons-codec-1.3.jar', 'jaxen-1.1.1.jar', 'smalljs.jar')
+JARS_NEEDED = ('ti-commons-codec-1.3.jar', 'jaxen-1.1.1.jar', 'smalljs.jar', 'titanium-verify.jar')
 TITANIUM_THEME="""<?xml version="1.0" encoding="utf-8"?>
 <resources>
 <style name="Theme.Titanium" parent="android:Theme">
@@ -104,6 +104,7 @@ cpath_additions = """
 <classpathentry kind="lib" path="lib/ti-commons-codec-1.3.jar"/>
 <classpathentry kind="lib" path="lib/jaxen-1.1.1.jar"/>
 <classpathentry kind="lib" path="lib/smalljs.jar"/>
+<classpathentry kind="lib" path="lib/titanium-verify.jar"/>
 """
 cpath_additions = cpath_additions.split('\n')
 if ticommon.ti_module_exists('titanium-contacts'):
@@ -166,6 +167,9 @@ if len(tisdk) > 0:
 		if not os.path.exists(os.path.join(lib_folder, jar)):
 			if os.path.exists(os.path.join(tisdk, 'android', jar)):
 				shutil.copy(os.path.join(tisdk, 'android', jar), os.path.join(lib_folder, jar))
+				print 'Copied over %s' % jar
+			elif os.path.exists(os.path.join(tisdk, 'android', 'lib', jar)):
+				shutil.copy(os.path.join(tisdk, 'android', 'lib', jar), os.path.join(lib_folder, jar))
 				print 'Copied over %s' % jar
 else:
 	print 'Could not locate Titanium SDK folder, so did not copy over any of the required jars like js.jar'
