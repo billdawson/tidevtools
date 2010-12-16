@@ -28,6 +28,32 @@ ENABLE_ANDROID_DEBUG = True
 EXEC_AT_END = [] # arglist for Popen, e.g. ['mvim', '--cmd', 'cd %project_folder%']
 #################################################
 ANDROID_DEBUG = '<property type="bool" name="ti.android.debug">true</property>'
+MANIFEST_TEMPLATE="""#appname: %project_name%
+#publisher: %PUBLISHER%
+#url: %PUBLISHER_URL%
+#image: appicon.png
+#appid: %project_id%
+#desc: undefined
+#type: mobile
+#guid: %guid%
+"""
+
+def replace_tokens(input):
+	result = []
+	pattern = r"(%\S+%)"
+	for item in input:
+		newitem = item
+		tokens = re.findall(pattern, newitem)
+		if tokens:
+			for token in tokens:
+				if token.replace('%', '') in globals():
+					newitem = newitem.replace(token, globals()[token.replace('%', '')])
+		result.append(newitem)
+	return result
+
+def replace_tokens_string(input):
+	result_list = replace_tokens( [ input ] )
+	return result_list[0]
 
 simulation = False
 no_db = False
@@ -119,11 +145,24 @@ if not simulation:
 		p = re.compile('<icon>')
 		tiappxml = p.sub(ANDROID_DEBUG + '\n<icon>', tiappxml)
 
+	if PUBLISHER:
+		p = re.compile('<publisher>not specified</publisher>')
+		tiappxml = p.sub('<publisher>' + PUBLISHER + '</publisher>', tiappxml)
+		p = re.compile('<copyright>not specified</copyright>')
+		tiappxml = p.sub('<copyright>%s by %s</copyright>' % (str(datetime.datetime.now().year), PUBLISHER), tiappxml)
+
+	if PUBLISHER_URL:
+		p = re.compile('<url>not specified</url>')
+		tiappxml = p.sub('<url>%s</url>' % PUBLISHER_URL, tiappxml)
+
 	f = open(os.path.join(project_folder, 'tiapp.xml'), 'w')
 	f.write(tiappxml)
 	f.close()
+	f = open(os.path.join(project_folder, 'manifest'), 'w')
+	f.write(replace_tokens_string(MANIFEST_TEMPLATE))
+	f.close()
 else:
-	print "SIMULATION - Would open the new tiapp.xml file, change the guid, etc."
+	print "SIMULATION - Would open the new tiapp.xml file, change the guid,  write out the manifest, etc."
 
 # sqlite
 if not simulation and not no_db:
@@ -187,19 +226,6 @@ if os.path.exists(template_folder):
 							os.makedirs(os.path.dirname(dest))
 						print "Copying %s -> %s" % (orig, dest)
 						shutil.copy(orig, dest)
-
-def replace_tokens(input):
-	result = []
-	pattern = r"(%\S+%)"
-	for item in input:
-		newitem = item
-		tokens = re.findall(pattern, newitem)
-		if tokens:
-			for token in tokens:
-				if token.replace('%', '') in globals():
-					newitem = newitem.replace(token, globals()[token.replace('%', '')])
-		result.append(newitem)
-	return result
 
 if EXEC_AT_END:
 	if not simulation:
