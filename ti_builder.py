@@ -36,15 +36,24 @@ name = appInfo['name']
 id = appInfo['id']
 
 command = 'build'
+debug = False
 
 if len(sys.argv) > 1:
-	command = sys.argv[1]
+	if sys.argv[1] == 'debug':
+		del sys.argv[1]
+		debug = True
+	if len(sys.argv) > 1:
+		command = sys.argv[1]
+
+args = [sys.executable]
+if debug:
+	args.append('-mpdb')
 
 if command == 'generate':
 	androidScript = os.path.join(tiDevSDK, 'android', 'android.py')
-	args = [sys.executable, androidScript, name, id, os.path.dirname(projectPath), androidSDK]
+	args.extend([androidScript, name, id, os.path.dirname(projectPath), androidSDK])
 else:
-	args = [sys.executable, builderScript, command, name, androidSDK, projectPath, id]
+	args.extend([builderScript, command, name, androidSDK, projectPath, id])
 
 # AVD arg support for emulator / simulator / install
 # 7 / HVGA reasonable defaults?
