@@ -54,10 +54,10 @@ def find_ti_sdk():
 			print "I couldn't find any subdirectories of %s." % tisdk_pat
 			sys.exit(1)
 		subdirs = [s for s in subs if os.path.isdir(os.path.join(tisdk_path, s))]
-		subdirs = [s for s in subdirs if os.path.exists(os.path.join(tisdk_path, s, 'README'))]
+		subdirs = [s for s in subdirs if os.path.exists(os.path.join(tisdk_path, s, 'version.txt'))]
 		maxtime = None
 		for onedir in subdirs:
-			thistime = os.path.getmtime(os.path.join(tisdk_path, onedir))
+			thistime = os.path.getmtime(os.path.join(tisdk_path, onedir, "version.txt"))
 			if maxtime is None:
 				sdkver = onedir
 				maxtime = thistime
