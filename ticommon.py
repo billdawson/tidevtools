@@ -74,11 +74,13 @@ def find_ti_dev_db():
 	tidev_db = ''
 	# only works for win7 at the moment
 	if is_windows():
-		tidev_db = os.path.join(env['USERPROFILE'], 'AppData', 'Roaming')
+		tidev_db = os.path.join(env['USERPROFILE'], 'AppData', 'Roaming', 'Titanium')
+	elif is_linux():
+		tidev_db = os.path.expanduser('~/.titanium')
 	else:
-		tidev_db = os.path.join(os.path.expanduser('~/Library'), 'Application Support')
+		tidev_db = os.path.join(os.path.expanduser('~/Library'), 'Application Support', 'Titanium')
 
-	tidev_db = os.path.join(tidev_db, 'Titanium', 'appdata', 'com.appcelerator.titanium.developer', 'app_com.appcelerator.titanium.developer_0', '0000000000000001.db')
+	tidev_db = os.path.join(tidev_db, 'appdata', 'com.appcelerator.titanium.developer', 'app_com.appcelerator.titanium.developer_0', '0000000000000001.db')
 	if not os.path.exists(tidev_db):
 		tidev_db = ''
 	return tidev_db

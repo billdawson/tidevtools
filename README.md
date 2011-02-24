@@ -22,6 +22,8 @@ Usage Instructions
 ### ti_makeproj.py
 Makes a Titanium mobile project, including making its entry in the Titanium Developer Sqlite DB (so you see it next time you open Developer).
 
+set ANDROID_SDK environment variable!
+
 Usage:
 
 `ti_makeproj.py [Project name]`
