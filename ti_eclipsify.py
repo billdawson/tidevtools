@@ -67,6 +67,18 @@ if os.path.exists(r_file):
 	os.remove(r_file)
 	print 'Moved R.java to "gen" folder'
 
+# put everything that's in gen/, except R.java, into src/. Eclipse (or the ADT plugin, whatever)
+# likes to cleanout the gen/ folder when building, which is really annoying when suddenly all of
+# our generated classes disappear.
+gen_files = [x for x in os.listdir(gen_folder) if x != 'R.java' and x[-5:] == '.java']
+if gen_files:
+	if not os.path.exists(src_folder):
+		os.makedirs(src_folder)
+	for one_gen_file in gen_files:
+		shutil.copyfile(os.path.join(gen_folder, one_gen_file), os.path.join(src_folder, one_gen_file))
+		os.remove(os.path.join(gen_folder, one_gen_file))
+
+
 if isWindows:
 	print "Copying Resources and tiapp.xml to assets folder because you're running Windows and therefore we're not going to make symlinks"
 	shutil.copytree(resources_folder, os.path.join(assets_folder, 'Resources'))
