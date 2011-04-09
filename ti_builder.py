@@ -21,7 +21,10 @@ androidSDK = ticommon.find_android_sdk()
 if not os.path.exists(androidSDK):
 	error("Android SDK directory doesn't exist: %s" % androidSDK)
 
-tiDevSDK = ticommon.find_ti_sdk()[0]
+if 'TI_VERSION' in os.environ:
+	tiDevSDK = ticommon.find_ti_sdk(version=os.environ['TI_VERSION'])[0]
+else:
+	tiDevSDK = ticommon.find_ti_sdk()[0]
 
 if not os.path.exists(tiDevSDK):
 	error("Titanium Mobile SDK directory doesn't exist: %s" % tiDevSDK)

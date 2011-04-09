@@ -22,7 +22,7 @@ def is_windows():
 def is_osx():
 	return platform.system() == 'Darwin'
 
-def find_ti_sdk():
+def find_ti_sdk(version=None):
 	"""Returns a tuple (path, version).  Path goes all the way down to the version"""
 	tisdk_path = ''
 	sdkver = ''
@@ -46,7 +46,10 @@ def find_ti_sdk():
 		else:
 			print 'Warning: TI_DEV_SDK is set, but the path doesn\'t exist'
 
-	if os.path.exists(tisdk_path):
+	if not version is None:
+		tisdk_path = os.path.join(tisdk_path, version)
+		sdkver = version
+	else:
 		sdkver = ''
 		# hunt for the latest sdk simply by mod date of version folders
 		subs = os.listdir(tisdk_path)
