@@ -26,7 +26,7 @@ except:
 
 isWindows = ticommon.is_windows()
 
-JARS_NEEDED = ('ti-commons-codec-1.3.jar', 'jaxen-1.1.1.jar', 'smalljs.jar', 'titanium-verify.jar')
+JARS_NEEDED = ('ti-commons-codec-1.3.jar', 'jaxen-1.1.1.jar', 'smalljs.jar', 'titanium-verify.jar', 'titanium-debug.jar')
 TITANIUM_THEME="""<?xml version="1.0" encoding="utf-8"?>
 <resources>
 <style name="Theme.Titanium" parent="android:Theme">
@@ -133,6 +133,10 @@ if ticommon.ti_module_exists('titanium-android'):
 	# if that's there then so is the localization one.
 	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-i18n"/>')
 
+tisdk = ticommon.find_ti_sdk()[0]
+
+if os.path.exists(os.path.join(tisdk, 'android', 'lib', "titanium-debug.jar")):
+	cpath_additions.append('<classpathentry kind="lib" path="lib/titanium-debug.jar"/>')
 
 cpath = os.path.join(android_folder, '.classpath')
 if os.path.exists(cpath):
@@ -173,7 +177,6 @@ if not os.path.exists(lib_folder):
 	os.mkdir(lib_folder)
 	print 'Made a "lib" folder'
 
-tisdk = ticommon.find_ti_sdk()[0]
 if len(tisdk) > 0:
 	for jar in JARS_NEEDED:
 		if not os.path.exists(os.path.join(lib_folder, jar)):
