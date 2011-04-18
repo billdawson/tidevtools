@@ -22,7 +22,7 @@ def is_windows():
 def is_osx():
 	return platform.system() == 'Darwin'
 
-def find_ti_sdk():
+def find_ti_sdk(version=None):
 	"""Returns a tuple (path, version).  Path goes all the way down to the version"""
 	tisdk_path = ''
 	sdkver = ''
@@ -46,7 +46,10 @@ def find_ti_sdk():
 		else:
 			print 'Warning: TI_DEV_SDK is set, but the path doesn\'t exist'
 
-	if os.path.exists(tisdk_path):
+	if not version is None:
+		tisdk_path = os.path.join(tisdk_path, version)
+		sdkver = version
+	else:
 		sdkver = ''
 		# hunt for the latest sdk simply by mod date of version folders
 		subs = os.listdir(tisdk_path)
@@ -54,10 +57,10 @@ def find_ti_sdk():
 			print "I couldn't find any subdirectories of %s." % tisdk_pat
 			sys.exit(1)
 		subdirs = [s for s in subs if os.path.isdir(os.path.join(tisdk_path, s))]
-		subdirs = [s for s in subdirs if os.path.exists(os.path.join(tisdk_path, s, 'README'))]
+		subdirs = [s for s in subdirs if os.path.exists(os.path.join(tisdk_path, s, 'version.txt'))]
 		maxtime = None
 		for onedir in subdirs:
-			thistime = os.path.getmtime(os.path.join(tisdk_path, onedir))
+			thistime = os.path.getmtime(os.path.join(tisdk_path, onedir, "version.txt"))
 			if maxtime is None:
 				sdkver = onedir
 				maxtime = thistime
@@ -74,11 +77,13 @@ def find_ti_dev_db():
 	tidev_db = ''
 	# only works for win7 at the moment
 	if is_windows():
-		tidev_db = os.path.join(env['USERPROFILE'], 'AppData', 'Roaming')
+		tidev_db = os.path.join(env['USERPROFILE'], 'AppData', 'Roaming', 'Titanium')
+	elif is_linux():
+		tidev_db = os.path.expanduser('~/.titanium')
 	else:
-		tidev_db = os.path.join(os.path.expanduser('~/Library'), 'Application Support')
+		tidev_db = os.path.join(os.path.expanduser('~/Library'), 'Application Support', 'Titanium')
 
-	tidev_db = os.path.join(tidev_db, 'Titanium', 'appdata', 'com.appcelerator.titanium.developer', 'app_com.appcelerator.titanium.developer_0', '0000000000000001.db')
+	tidev_db = os.path.join(tidev_db, 'appdata', 'com.appcelerator.titanium.developer', 'app_com.appcelerator.titanium.developer_0', '0000000000000001.db')
 	if not os.path.exists(tidev_db):
 		tidev_db = ''
 	return tidev_db
