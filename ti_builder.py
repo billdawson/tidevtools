@@ -8,13 +8,14 @@ import ticommon
 
 projectPath = os.path.abspath(os.getcwd())
 tiappXML = os.path.join(projectPath, 'tiapp.xml')
+timoduleXML = os.path.join(projectPath, 'timodule.xml')
 
 def error(msg):
 	print >>sys.stderr, "Error: " + msg
 	sys.exit(1)
 
-if not os.path.exists(tiappXML):
-	error("No tiapp.xml found, are you in a Titanium project?")
+if not (os.path.exists(tiappXML) or os.path.exists(timoduleXML)):
+	error("No tiapp.xml/timodule.xml found, are you in a Titanium project?")
 
 androidSDK = ticommon.find_android_sdk()
 
@@ -53,7 +54,11 @@ if command == 'generate':
 	androidScript = os.path.join(tiDevSDK, 'android', 'android.py')
 	args.extend([androidScript, name, id, os.path.dirname(projectPath), androidSDK])
 else:
-	args.extend([builderScript, command, name, androidSDK, projectPath, id])
+	if command == 'run' and os.path.exists(timoduleXML): # running a module project
+		moduleBuilderScript = os.path.join(tiDevSDK, 'module', 'builder.py')
+		args.extend([moduleBuilderScript, command, 'android', projectPath])
+	else:
+		args.extend([builderScript, command, name, androidSDK, projectPath, id])
 
 # AVD arg support for emulator / simulator / install
 # 7 / HVGA reasonable defaults?
