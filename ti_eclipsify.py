@@ -125,9 +125,6 @@ if ticommon.ti_module_exists('titanium-contacts'):
 if ticommon.ti_module_exists('titanium-calendar'):
 	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-calendar"/>')
 
-if ticommon.ti_module_exists('titanium-bump'):
-	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-bump"/>')
-
 if ticommon.ti_module_exists('titanium-android'):
 	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-android"/>')
 	# if that's there then so is the localization one.
