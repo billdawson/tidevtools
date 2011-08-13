@@ -16,6 +16,8 @@ Suggested Steps To Use It
 
      alias ec="/Users/bill/projects/tidevtools/ti_eclipsify.py"
 
+     alias an="/Users/bill/projects/tidevtools/ti_android_device.py"
+
 Usage Instructions
 -------------------
 
@@ -37,3 +39,13 @@ That will create a MyProject folder in the folder you specify in the PROJECT_FOL
 ### ti_eclipsify.py
 
 Does what you expect.  Run it while you are sitting in the root of a project (where the tiapp.xml is.)
+
+### ti_android_device.py
+
+If you're sitting in a Titanium project folder (a folder with tiapp.xml) and run this with no options, it checks to see if the project you're sitting in is installed on any connected Android devices.  If it is, it gives you options to uninstall from those devices.  Also, if it sees that build/android/bin/app.apk is there (i.e., you've built the project at leat once), it gives you options to install the APK on any of the connected devices.
+
+Alternatively, you can run this script from anywhere with the "-u [package_filter]" option, such as:
+
+`ti_android_device.py -u com.billdawson`
+
+It will then check all your connected Android devices to see if they have any packages whose names begin with the filter you've provided.  If it finds any, it gives you the option to uninstall those matching packages from the device(s).  You can select one-by-one the ones you want to uninstall (and from which device.)
