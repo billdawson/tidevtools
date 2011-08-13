@@ -3,7 +3,7 @@
  * tidevtools 'ti_eclipsify' - Prepare a Titanium mobile project folder
  * for importing into Eclipse.
  *
- * Copyright (c) 2010 by Bill Dawson
+ * Copyright (c) 2010-2011 by Bill Dawson
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  * http://github.com/billdawson/tidevtools
@@ -128,7 +128,7 @@ if ticommon.ti_module_exists('titanium-calendar'):
 if ticommon.ti_module_exists('titanium-android'):
 	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-android"/>')
 	# if that's there then so is the localization one.
-	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-i18n"/>')
+	cpath_additions.append('<classpathentry combineaccessrules="false" kind="src" path="/titanium-locale"/>')
 
 tisdk = ticommon.find_ti_sdk()[0]
 
