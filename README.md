@@ -38,7 +38,15 @@ That will create a MyProject folder in the folder you specify in the PROJECT_FOL
 
 ### ti_eclipsify.py
 
+**DEPRECATED** -- will not function correctly if you're Titanium SDK source in Eclipse is from 1.8.0 or higher.  Replaced by ti_eclipsify2.py.
+
 Does what you expect.  Run it while you are sitting in the root of a project (where the tiapp.xml is.)
+
+### ti_eclipsify2.py
+
+Does what you expect.  Run it while you are sitting in the root of a project (where the tiapp.xml is.)
+
+(More info soon.)
 
 ### ti_android_device.py
 

@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 """
+ * DEPRECATED! This is replaced by ti_eclipsify2.py because the
+ * Eclipse projects have changed in Titanium 1.8.0 source.
+ *
  * tidevtools 'ti_eclipsify' - Prepare a Titanium mobile project folder
  * for importing into Eclipse.
  *
@@ -10,7 +13,7 @@
  *
  * Just run this script at the top of a project folder.
 """
-print "tidevtools 'ti_eclipsify'"
+print "tidevtools 'ti_eclipsify' -- DEPRECATED -- SEE README"
 
 import sys, os, platform, shutil
 from os import environ as env
