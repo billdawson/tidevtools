@@ -60,12 +60,12 @@ class AndroidDevice(object):
 
 	def get_packages(self):
 		args = self.adb_arg_set()
-		args.extend(("shell", "ls /data/data"))
+		args.extend(("shell", "pm list packages"))
 		output, outerr = Popen(args, stdout=PIPE, stderr=PIPE).communicate()
 		if len(outerr) > 0:
 			print >> sys.stderr, outerr
 		if len(output) > 0:
-			return [line.strip() for line in output.split("\n") if "." in line]
+			return [line.strip()[8:] for line in output.split("\n") if "package:" in line]
 		else:
 			return []
 

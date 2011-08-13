@@ -83,21 +83,23 @@ def print_common_commands():
 	bl(1)
 
 def choice_handler(options):
-	choice = raw_input("Enter an option: ")
-	if choice.lower() == "q":
-		sys.exit(0)
-	elif choice.lower() == "r":
-		restart_adb_server()
-	elif choice.isdigit() and int(choice) < len(options):
-		fx = options[int(choice)]["function"]
-		fx(options[int(choice)]["arg"])
-		# Special case: if the function being executed is uninstall, also
-		# remove the folder that Titanium apps put directly into the
-		# sdcard root, e.g., /sdcard/com.appcelerator.titanium.
-		if "uninstall" in str(fx):
-			fx.__self__.shell_exec("rm -r /sdcard/%s" % options[int(choice)]["arg"], silent=True)
-	else:
-		print >> sys.stderr, "Invalid choice"
+	raw = raw_input("Enter an option (or comma-sep options): ")
+	choices = [choice.strip().lower() for choice in raw.split(",")]
+	for choice in choices:
+		if choice == "q":
+			sys.exit(0)
+		elif choice == "r":
+			restart_adb_server()
+		elif choice.isdigit() and int(choice) < len(options):
+			fx = options[int(choice)]["function"]
+			fx(options[int(choice)]["arg"])
+			# Special case: if the function being executed is uninstall, also
+			# remove the folder that Titanium apps put directly into the
+			# sdcard root, e.g., /sdcard/com.appcelerator.titanium.
+			if "uninstall" in str(fx):
+				fx.__self__.shell_exec("rm -r /sdcard/%s" % options[int(choice)]["arg"], silent=True)
+		else:
+			print >> sys.stderr, "Ignoring invalid choice '%s'" % choice
 	raw_input("Press <Enter> to continue...")
 
 def show_project_options():
