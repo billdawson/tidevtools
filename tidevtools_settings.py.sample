@@ -5,10 +5,12 @@ PUBLISHER_URL = 'billdawson.com'
 DISABLE_ANALYTICS = True
 ENABLE_ANDROID_DEBUG = True
 EXEC_AT_END = ['mvim', '--cmd', 'cd %project_folder%', '-c', 'NERDTree']
+ECLIPSE_PROJ_BOOTSTRAP_PATH = '/Users/bill/projects/ti_eclipse_project_defaults'
+
 
 """
 NOTES:
-The EXEC_AT_END is used to launch a process using python's 
+The EXEC_AT_END is used by the ti_makeproj.py script to launch a process using python's 
 subprocess.Popen.  In my example, I'm launching mvim (MacVim) and
 telling it to immediately change directory to the project folder 
 that was created, then to run the command (inside vim) "NERDTree", which

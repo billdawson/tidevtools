@@ -137,15 +137,6 @@ def get_app_info(project_root):
 
 def get_appid(project_root):
 	return get_app_info(project_root)['id']
-	"""tiapp = os.path.join(os.path.join(project_root, 'tiapp.xml'))
-	if not os.path.exists(tiapp):
-		raise Exception('%s does not exist' % tiapp)
-	f = open(tiapp, 'r')
-	xml =f.read()
-	f.close()
-	match = re.search(r"<id>(.*)</id>", xml)
-	if match and match.groups() and len(match.groups()):
-		return match.groups()[0]"""
 
 def ti_module_exists(module):
 	tisdk = find_ti_sdk()[0]
