@@ -30,6 +30,7 @@ class AndroidDevice(object):
 	def __init__(self, device_type=UNKNOWN, serial_number=None, parse_line=None):
 		self.serial_number = serial_number
 		self.device_type = device_type
+		self._can_read_data_dir = None
 		if parse_line is not None:
 			m = AndroidDevice.prog_device.match(parse_line)
 			if m is not None and len(m.groups()) == 2:
@@ -60,14 +61,38 @@ class AndroidDevice(object):
 
 	def get_packages(self):
 		args = self.adb_arg_set()
-		args.extend(("shell", "pm list packages"))
-		output, outerr = Popen(args, stdout=PIPE, stderr=PIPE).communicate()
-		if len(outerr) > 0:
-			print >> sys.stderr, outerr
-		if len(output) > 0:
-			return [line.strip()[8:] for line in output.split("\n") if "package:" in line]
+		if not self.can_read_data_dir():
+			args.extend(("shell", "pm list packages"))
+			output, outerr = Popen(args, stdout=PIPE, stderr=PIPE).communicate()
+			if len(outerr) > 0:
+				print >> sys.stderr, outerr
+			if len(output) > 0:
+				return [line.strip()[8:] for line in output.split("\n") if "package:" in line]
+			else:
+				return []
 		else:
-			return []
+			# Parsing through contents of /data/data is faster than pm list packages
+			args.extend(("shell", "ls /data/data"))
+			output, outerr = Popen(args, stdout=PIPE, stderr=PIPE).communicate()
+			if len(outerr) > 0:
+				print >> sys.stderr, outerr
+			if len(output) > 0:
+				return [p.strip() for p in output.split("\n") if "." in p]
+			else:
+				return []
+
+	def can_read_data_dir(self):
+		if self._can_read_data_dir is not None:
+			return self._can_read_data_dir
+		args = self.adb_arg_set()
+		args.extend(("shell", "ls /data/data || echo FAIL"))
+		p = Popen(args, stdout=PIPE, stderr=PIPE)
+		outdata, outerr = p.communicate()
+		if len(outerr) > 0 or p.returncode != 0 or "FAIL" in outdata:
+			self._can_read_data_dir = False
+		else:
+			self._can_read_data_dir = True
+		return self._can_read_data_dir
 
 	def has_package(self, package_name):
 		return package_name in self.get_packages()
