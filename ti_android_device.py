@@ -15,7 +15,12 @@ If, instead, you use the -u option, you will have the opportunity
 to uninstall (-u) from your connected devices any packages whose names begin 
 with the value you provide for -u. "-u com.appcelerator" will show you
 any packages whose names begin with "com.appcelerator" and give you the
-opportunity to remove them from your connected device(s)."""
+opportunity to remove them from your connected device(s).
+
+If you use the -i (--immediate) option, the Titanium app in your current
+folder will immediately be removed from any attached Android devices or
+emulators on which it is found.  This option contains no UI.  -u takes
+precedence over -i, so if you include both then -i is ignored."""
 
 import os, sys, re, optparse
 from time import sleep
@@ -189,9 +194,13 @@ if __name__ == "__main__":
 	elif not options.package_filter and not options.immediate:
 		while True:
 			show_project_options()
+	elif options.package_filter:
+		while True:
+			show_multi_uninstaller(options.package_filter)
 	elif options.immediate:
 		do_immediate_uninstall()
 	else:
-		while True:
-			show_multi_uninstaller(options.package_filter)
+		print >> sys.stderr, "Unknown options"
+		parser.print_usage(sys.stderr)
+		sys.exit(1)
 
