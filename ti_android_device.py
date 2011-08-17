@@ -102,6 +102,20 @@ def choice_handler(options):
 			print >> sys.stderr, "Ignoring invalid choice '%s'" % choice
 	raw_input("Press <Enter> to continue...")
 
+def do_immediate_uninstall():
+	devices = get_connected_devices()
+	print "Checking devices: %s" % devices
+	package = get_project_package()
+	did_one = False
+	for d in devices:
+		if d.has_package(package):
+			print "Uninstalling %s from %s" % (package, d.serial_number)
+			d.uninstall(package)
+			did_one = True
+	if not did_one:
+		print "No attached devices contained %s" % package
+
+
 def show_project_options():
 	devices = get_connected_devices()
 	print_header(devices)
@@ -162,14 +176,21 @@ if __name__ == "__main__":
 	parser.add_option("-u", "--uninstall",
 			dest="package_filter",
 			help="Show packages whose names begin with given value and give opportunity to uninstall them.")
+	parser.add_option("-i", "--immediate",
+			dest="immediate",
+			action="store_true",
+			default=False,
+			help="Immediately uninstall app in your current directory from all connected devices that have it.")
 	options, args = parser.parse_args()
 
 	if not options.package_filter and not os.path.exists(os.path.join(cur_dir, "tiapp.xml")):
 		print >> sys.stderr, "No tiapp.xml file found. Need to be in a titanium project folder unless you use the -u option."
 		sys.exit(1)
-	elif not options.package_filter:
+	elif not options.package_filter and not options.immediate:
 		while True:
 			show_project_options()
+	elif options.immediate:
+		do_immediate_uninstall()
 	else:
 		while True:
 			show_multi_uninstaller(options.package_filter)
