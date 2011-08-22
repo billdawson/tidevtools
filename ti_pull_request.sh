@@ -29,7 +29,8 @@ if [[ $timob_issue != TIMOB-* ]]; then
 	exit 1
 fi
 
-issue_summary=$(curl -s "$jira_rest_url/$timob_issue" | python -c "$summary_py")
+echo "Getting $jira_rest_url/$timob_issue"
+issue_summary=$(curl -s "$jira_rest_url/$timob_issue" | python -c "$summary_py" | sed 's/"/\\"/g')
 
 if [[ $issue_summary == __ERROR__* ]]; then
 	echo "Error: Couldn't load issue summary from JIRA"
