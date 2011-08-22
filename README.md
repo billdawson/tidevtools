@@ -59,3 +59,7 @@ Alternatively, you can run this script from anywhere with the "-u [package_filte
 It will then check all your connected Android devices to see if they have any packages whose names begin with the filter you've provided.  If it finds any, it gives you the option to uninstall those matching packages from the device(s).  You can select one-by-one the ones you want to uninstall (and from which device.)
 
 Alternatively, you can run this script from a Titanium project folder with the -i (--immediate) option, in which case no UI will be displayed and instead the app from your current directory will be uninstalled from all attached Android devices or emulators on which it is installed.
+
+### ti_pull_request.sh
+
+Automatically opens the URL for sending a pull request on github from the current branch. Makes some assumptions (see the script for more details)
