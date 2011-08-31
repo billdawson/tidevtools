@@ -142,3 +142,17 @@ def ti_module_exists(module):
 	tisdk = find_ti_sdk()[0]
 	return os.path.exists(os.path.join(tisdk, 'android', 'modules', '%s.jar' % module))
 
+def is_mobile_repo(repo_dir):
+	return os.path.exists(os.path.join(repo_dir, "SConstruct")) \
+		and os.path.exists(os.path.join(repo_dir, "build", "titanium_version.py"))
+
+def find_mobile_repo(max_depth=5):
+	repo_dir = os.path.abspath(os.getcwd())
+	depth = 1
+	while depth < max_depth:
+		if is_mobile_repo(repo_dir):
+			return repo_dir
+		if repo_dir == os.path.dirname(repo_dir):
+			return None
+		repo_dir = os.path.dirname(repo_dir)
+	return None
