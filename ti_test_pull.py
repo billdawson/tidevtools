@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-import os, sys, re
+import os, sys, re, platform
 import json, urllib, optparse
+import zipfile
 from subprocess import *
 
 import ticommon
@@ -70,25 +71,46 @@ def checkout_pull_branch(pull_number):
 		git("pull", TIMOBILE_ORIGIN, "master")
 
 		# Create a local testing branch
-		git("checkout", "-B", "%s_%s" % (user, local_branch))
+		global test_branch
+		test_branch = "%s_%s" % (user, local_branch)
+
+		git("checkout", "-B", test_branch)
 		git("pull", remote, branch)
 
 	except Exception, e:
 		print >>sys.stderr, "Error getting pull request %s: %s" % (pull_number, e)
 
 def build_mobilesdk():
-	p = Popen(["scons"], cwd=mobile_repo, shell=True)
+	sys.path.append(os.path.join(mobile_repo, "build"))
+	import titanium_version
+
+	global sdk_version, test_branch
+	sdk_version = "%s.%s" % (titanium_version.version, test_branch)
+
+	p = Popen(["scons", "version_tag=%s" % sdk_version], cwd=mobile_repo, shell=True)
 	p.communicate()
 	if p.returncode != 0:
 		print >>sys.stderr, "Error Building MobileSDK"
 		sys.exit(p.returncode)
 
 def extract_mobilesdk():
-	sys.path.append(mobile_repo, "drillbit")
-	import drillbit
-	return drillbit.extract_mobilesdk()
+	mobile_dist_dir = os.path.join(mobile_repo, 'dist')
+	sys.path.append(mobile_dist_dir)
+	sys.path.append(os.path.join(mobile_repo, 'build'))
 
-def create_project(mobilesdk_dir, local_branch):
+	platform_name = {"Darwin": "osx", "Windows": "win32", "Linux": "linux"}[platform.system()]
+	mobilesdk_dir = os.path.join(mobile_dist_dir, 'mobilesdk', platform_name, sdk_version)
+	mobilesdk_zipfile = os.path.join(mobile_dist_dir, 'mobilesdk-%s-%s.zip' % (sdk_version, platform_name))
+	if platform.system() == 'Darwin':
+		Popen(['/usr/bin/unzip', '-q', '-o', '-d', mobile_dist_dir, mobilesdk_zipfile])
+	else:
+		# extract the mobilesdk zip so we can use it for testing
+		mobilesdk_zip = zipfile.ZipFile(mobilesdk_zipfile)
+		mobilesdk_zip.extractall(mobile_dist_dir)
+		mobilesdk_zip.close()
+	return mobilesdk_dir
+
+def create_project(local_branch):
 	project_script = os.path.join(mobilesdk_dir, "project.py")
 	project_id = "%s.%s" % (PROJECT_ID_PREFIX.rstrip("."), local_branch)
 
@@ -120,6 +142,7 @@ def validate_tdoc():
 		print "TDoc succesfully validated"
 
 def run_drillbit():
+	# TODO: drillbit needs to be able to override the mobile sdk dir
 	drillbit_script = os.path.join(mobile_repo, "drillbit", "drillbit.py")
 	p = Popen([sys.executable, drillbit_script])
 	p.communicate()
@@ -154,6 +177,11 @@ def main():
 	build = options.project or options.drillbit or options.build
 	if build:
 		build_mobilesdk()
+
+	extract = options.project or options.drillbit
+	if extract:
+		global mobilesdk_dir
+		mobilesdk_dir = extract_mobilesdk()
 
 	if options.project:
 		create_project()
