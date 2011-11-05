@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- * tidevtools 'ti_eclipsify2' - Prepare a Titanium mobile 1.8.0+ project folder
+ * tidevtools 'ti_eclipsify3' - Prepare a Titanium mobile 1.8.0+ project folder
  * for importing into Eclipse.
  *
  * Copyright (c) 2010-2011 by Bill Dawson
@@ -41,6 +41,7 @@ if not os.path.exists(resources_folder):
 
 android_folder = os.path.join('.', 'build', 'android')
 assets_folder = os.path.join(android_folder, 'assets')
+bin_assets_folder = os.path.join(android_folder, "bin", "assets")
 required_folders = (android_folder,
 		os.path.join(assets_folder),
 		os.path.join(android_folder, "res"),
@@ -91,6 +92,10 @@ if gen_files:
 	for one_gen_file in gen_files:
 		shutil.copyfile(os.path.join(gen_folder, one_gen_file), os.path.join(src_folder, one_gen_file))
 		os.remove(os.path.join(gen_folder, one_gen_file))
+
+# if bin/assets/app.json is there, copy it to assets/app.json
+if os.path.exists(os.path.join(bin_assets_folder, "app.json")):
+	shutil.copyfile(os.path.join(bin_assets_folder, "app.json"), os.path.join(assets_folder, "app.json"))
 
 if is_windows:
 	log.info("Copying Resources and tiapp.xml to assets folder because you're running Windows and therefore we're not going to make symlinks")
