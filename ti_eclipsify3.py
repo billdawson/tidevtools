@@ -12,6 +12,7 @@
 """
 import sys, os, platform, shutil
 from os import environ as env
+from subprocess import call
 
 this_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(this_path)
@@ -76,7 +77,7 @@ gen_folder =os.path.join(android_folder, 'gen', ticommon.appid_to_path(appid))
 if not os.path.exists(gen_folder):
 	os.makedirs(gen_folder)
 
-src_folder = os.path.join(android_folder, 'src', ticommon.appid_to_path(appid))
+src_folder = os.path.abspath(os.path.join(android_folder, 'src', ticommon.appid_to_path(appid)))
 r_file = os.path.join(src_folder, 'R.java')
 if os.path.exists(r_file):
 	shutil.copyfile(r_file, os.path.join(gen_folder, 'R.java'))
@@ -92,6 +93,14 @@ if gen_files:
 	for one_gen_file in gen_files:
 		shutil.copyfile(os.path.join(gen_folder, one_gen_file), os.path.join(src_folder, one_gen_file))
 		os.remove(os.path.join(gen_folder, one_gen_file))
+
+# Get rid of calls to TiVerify in the Application.java
+application_java = [f for f in gen_files if f.endswith("Application.java")]
+if application_java:
+	application_java = os.path.abspath(os.path.join(src_folder, application_java[0]))
+	lines = open(application_java, 'r').readlines()
+	lines = [l for l in lines if "TiVerify" not in l and "verify.verify" not in l]
+	open(application_java, "w").write("".join(lines))
 
 # if bin/assets/app.json is there, copy it to assets/app.json
 if os.path.exists(os.path.join(bin_assets_folder, "app.json")):
