@@ -7,6 +7,7 @@ import os, sys, platform, subprocess
 import ticommon
 
 projectPath = os.path.abspath(os.getcwd())
+
 tiappXML = os.path.join(projectPath, 'tiapp.xml')
 timoduleXML = os.path.join(projectPath, 'timodule.xml')
 

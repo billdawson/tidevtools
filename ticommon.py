@@ -28,6 +28,8 @@ def find_ti_sdk(version=None):
 	sdkver = ''
 	if is_osx():
 		tisdk_path = os.path.join('/', 'Library', 'Application Support', 'Titanium', 'mobilesdk', 'osx')
+		if not os.path.exists(tisdk_path):
+			tisdk_path = os.path.expanduser("~%s" % tisdk_path)
 	elif is_linux():
 		tisdk_path = os.path.expanduser(os.path.join('~', '.titanium', 'mobilesdk', 'linux'))
 	else:
