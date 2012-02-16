@@ -106,6 +106,10 @@ if application_java:
 if os.path.exists(os.path.join(bin_assets_folder, "app.json")):
 	shutil.copyfile(os.path.join(bin_assets_folder, "app.json"), os.path.join(assets_folder, "app.json"))
 
+# if bin/assets/index.json is there, copy it to assets/index.json
+if os.path.exists(os.path.join(bin_assets_folder, "index.json")):
+	shutil.copyfile(os.path.join(bin_assets_folder, "index.json"), os.path.join(assets_folder, "index.json"))
+
 if is_windows:
 	log.info("Copying Resources and tiapp.xml to assets folder because you're running Windows and therefore we're not going to make symlinks")
 	shutil.copytree(resources_folder, os.path.join(assets_folder, 'Resources'))
