@@ -1,7 +1,13 @@
 #!/usr/bin/env python
-# To run this you need to set 2 environment variables:
-# ANDROID_SDK : path to android sdk
-# TI_DEV_SDK : path to the top level directory of the mobilesdk
+
+# To run this you should set the ANDROID_SDK environment
+# variable to point to the root of the Android SDK installation
+# directory. Mine points to
+# /opt/android-sdk-mac_86
+
+# ti_builder.py
+# Run this from the root directory of a Titanium project
+# (the directory containing tiapp.xml)
 
 import os, sys, platform, subprocess
 import ticommon

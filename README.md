@@ -21,6 +21,10 @@ Suggested Steps To Use It
 Usage Instructions
 -------------------
 
+### ti_builder.py
+
+If you're sitting in the root directory of a Titanium project -- the directory containing tiapp.xml -- and you run this, it will build the Android apk for you.  If you pass `simulator` as an argument, it'll also install the app on a running emulator.  If you instead pass `install`, it will install on to an attached Android device.  If you don't pass anything as an argument, it just builds the project, producing the .apk file down in build/android/bin.
+
 ### ti_makeproj.py
 Makes a Titanium mobile project, including making its entry in the Titanium Developer Sqlite DB (so you see it next time you open Developer).
 
@@ -44,9 +48,11 @@ Does what you expect.  Run it while you are sitting in the root of a project (wh
 
 ### ti_eclipsify2.py
 
-Does what you expect.  Run it while you are sitting in the root of a project (where the tiapp.xml is.)
+**DEPRECATED** Does what you expect.  Run it while you are sitting in the root of a project (where the tiapp.xml is.)
 
-(More info soon.)
+### ti_eclipsify3.py
+
+Does what you expect.  Run it while you are sitting in the root of a project (where the tiapp.xml is.)
 
 ### ti_android_device.py
 
