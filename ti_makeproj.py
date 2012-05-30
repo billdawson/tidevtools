@@ -117,9 +117,9 @@ import project, run
 project_id = PROJECT_ID_PREFIX + project_name.lower()
 args = ['python', os.path.join(tisdk_path, 'project.py'), project_name, project_id, PROJECT_FOLDER]
 if isWindows:
-	args.append('android')
+	args.append('android', 'mobileweb')
 else:
-	args.extend(('iphone', 'android'))
+	args.extend(('iphone', 'android', 'mobileweb'))
 args.append(android_sdk)
 
 if not simulation:
