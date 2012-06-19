@@ -1,30 +1,71 @@
 #!/usr/bin/env python
 import zipfile, os, sys
+import json, urllib
+
+
+TI_CLOUD = ("2.0.5", "2.0.6") # old versus new
+TI_CLOUD_PUSH = ("2.0.5", "2.0.5") # old versus new
+SDK_VER = ("2.0.2.GA", "2.1.0") # old versus new
+
+"""
+Steps:
+* Fill in the TI_CLOUD, TI_CLOUD_PUSH and SDK_VER lists above.
+* Package all platform zips using "scons package_all=1".
+* Copy the three zip files (under dist/) to the folder indicated by DIR below.
+* Run this file.
+* Look in "osx-results.txt", etc., to see any differences between the contents of the old
+and new zip files. If anything looks funny, investigate.
+* If everything looks good, give the three newer .bom files to QE.
+"""
 
 DIR = "/Users/bill/tmp"
 PLATFORMS = ("osx", "win32", "linux")
-TI_CLOUD = ("2.0.1", "2.0.4") # old versus new
-TI_CLOUD_PUSH = ("2.0.1", "2.0.3")
-SDK_VER = ("2.0.1.GA2", "2.0.2")
+REL_LIST_URL = "http://api.appcelerator.net/p/v1/release-list"
 
-def write_bom(path, platform, label):
-	z = zipfile.ZipFile(path, "r")
+def download_status(blocks_so_far, block_size, file_size):
+	bytes_so_far = blocks_so_far * block_size
+	if bytes_so_far % 1000 == 0:
+		sys.stdout.write(".")
+		sys.stdout.flush()
+
+
+def get_old_zips():
+	download_info = None
+	for p in PLATFORMS:
+		zip_file = os.path.join(DIR, "mobilesdk-%s-%s.zip" % (SDK_VER[0], p))
+		if not os.path.exists(zip_file):
+			if not download_info:
+				fh = urllib.urlopen(REL_LIST_URL)
+				data = fh.read()
+				fh.close()
+				versions = json.loads(data)["releases"]
+				download_info = [v for v in versions if v["version"] == SDK_VER[0]]
+			# download the zip and put in DIR
+			for info in download_info:
+				if info["name"] == "mobilesdk" and info["os"] == p:
+					url  = info["url"]
+					print "Fetching %s zip for %s...\n" % (SDK_VER[0], p)
+					urllib.urlretrieve(url, zip_file, download_status)
+					sys.stdout.write("\n")
+					break
+
+def write_bom(zip_path, bom_path):
+	z = zipfile.ZipFile(zip_path, "r")
 	contents = sorted(set(z.namelist()))
-	out_path = os.path.join(DIR, "%s-%s.txt" % (platform, label))
-	with open(out_path, "w") as f:
+	with open(bom_path, "w") as f:
 		f.write("\n".join(contents))
 	z.close()
 
 def write_boms():
 	for platform in (PLATFORMS):
 		file_path = os.path.join(DIR, "mobilesdk-%s-%s.zip" % (SDK_VER[0], platform))
-		write_bom(file_path, platform, "old")
+		write_bom(file_path, os.path.join(DIR, "mobilesdk-%s-%s.bom" % (SDK_VER[0], platform)))
 		file_path = os.path.join(DIR, "mobilesdk-%s-%s.zip" % (SDK_VER[1], platform))
-		write_bom(file_path, platform, "new")
+		write_bom(file_path, os.path.join(DIR, "mobilesdk-%s-%s.bom" % (SDK_VER[1], platform)))
 
 def compare(platform):
-	old_list_file = os.path.join(DIR, "%s-old.txt" % platform)
-	new_list_file = os.path.join(DIR, "%s-new.txt" % platform)
+	old_list_file = os.path.join(DIR, "mobilesdk-%s-%s.bom" % (SDK_VER[0], platform))
+	new_list_file = os.path.join(DIR, "mobilesdk-%s-%s.bom" % (SDK_VER[1], platform))
 	with open(old_list_file, "r") as f:
 		old_lines = f.readlines()
 	with open(new_list_file, "r") as f:
@@ -37,9 +78,8 @@ def compare(platform):
 	old_push_prefix = "modules/android/ti.cloudpush/%s" % TI_CLOUD_PUSH[0]
 	new_push_prefix = "modules/android/ti.cloudpush/%s" % TI_CLOUD_PUSH[1]
 
-	log_file = "%s-results.txt" % platform
+	log_file = os.path.join(DIR, "%s-results.txt" % platform)
 	if os.path.exists(log_file):
-		print "heck"
 		os.remove(log_file)
 
 	def log(s):
@@ -87,9 +127,11 @@ def compare(platform):
 	check_diffs("old", "new")
 	check_diffs("new", "old")
 	
-write_boms()
+if __name__ == "__main__":
+	get_old_zips()
+	write_boms()
 
-for platform in PLATFORMS:
-	compare(platform)
+	for platform in PLATFORMS:
+		compare(platform)
 
 
