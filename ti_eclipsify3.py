@@ -41,6 +41,7 @@ if not os.path.exists(resources_folder):
 	sys.exit(1)
 
 android_folder = os.path.join('.', 'build', 'android')
+
 assets_folder = os.path.join(android_folder, 'assets')
 bin_assets_folder = os.path.join(android_folder, "bin", "assets")
 required_folders = (android_folder,
@@ -59,9 +60,22 @@ is_windows = ticommon.is_windows()
 # Put a file named tidevtools_settings.py in the 
 # same folder as this file, then you can override this
 ECLIPSE_PROJ_BOOTSTRAP_PATH = '' # /e.g., /Users/bill/projects/ti_eclipse_project_defaults
+TIMOBILE_SRC = ''
 #################################################
 if os.path.exists(os.path.join(this_path, 'tidevtools_settings.py')):
 	execfile(os.path.join(this_path, 'tidevtools_settings.py'))
+
+# To make sure rhino works, move kroll-rhino-bindings.jar and
+# kroll-rhino-js.jar into libs
+libs_folder = os.path.join(android_folder, "libs")
+if not os.path.exists(libs_folder):
+	os.mkdir(libs_folder)
+rhino_bindings = os.path.join(libs_folder, "kroll-rhino-bindings.jar")
+rhino_js = os.path.join(libs_folder, "kroll-rhino-js.jar")
+if not os.path.exists(rhino_bindings):
+	shutil.copyfile(os.path.join(TIMOBILE_SRC, "dist", "android", "kroll-rhino-bindings.jar"), rhino_bindings)
+if not os.path.exists(rhino_js):
+	shutil.copyfile(os.path.join(TIMOBILE_SRC, "dist", "android", "kroll-rhino-js.jar"), rhino_js)
 
 if (ECLIPSE_PROJ_BOOTSTRAP_PATH is None or len(ECLIPSE_PROJ_BOOTSTRAP_PATH) == 0 or
 		not os.path.exists(ECLIPSE_PROJ_BOOTSTRAP_PATH)):
@@ -101,6 +115,29 @@ if application_java:
 	lines = open(application_java, 'r').readlines()
 	lines = [l for l in lines if "TiVerify" not in l and "verify.verify" not in l]
 	open(application_java, "w").write("".join(lines))
+
+# To avoid the Android 2373 warning, set special property in AppInfo.java
+appinfo_java = [f for f in gen_files if f.endswith("AppInfo.java")]
+if appinfo_java:
+	appinfo_java = os.path.abspath(os.path.join(src_folder, appinfo_java[0]))
+	lines = open(appinfo_java, 'r').readlines()
+	lines_out = []
+	for l in lines:
+		if l.endswith("app.getAppProperties();\n"):
+			lines_out.append(l)
+			lines_out.append('\t\t\t\t\tproperties.setBool("ti.android.bug2373.disableDetection", true);\n')
+			lines_out.append('\t\t\t\t\tappProperties.setBool("ti.android.bug2373.disableDetection", true);\n')
+		else:
+			lines_out.append(l)
+	with open(appinfo_java, 'w') as f:
+		f.write("".join(lines_out))
+
+# Remove all code for starting up the debugger.
+if application_java:
+	lines = open(application_java, 'r').readlines()
+	lines = [l for l in lines if "debug" not in l.lower()]
+	open(application_java, "w").write("".join(lines))
+
 
 # if bin/assets/app.json is there, copy it to assets/app.json
 if os.path.exists(os.path.join(bin_assets_folder, "app.json")):
