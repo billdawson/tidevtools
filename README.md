@@ -1,5 +1,5 @@
-tidevtools from Bill Dawson
-============================
+tidevtools from Bill Dawson (and others)
+========================================
 
 Includes a script to make a Titanium mobile project, and a script to "eclipsify" a project.
 
@@ -52,7 +52,7 @@ Does what you expect.  Run it while you are sitting in the root of a project (wh
 
 ### ti_eclipsify3.py
 
-Does what you expect.  Run it while you are sitting in the root of a project (where the tiapp.xml is.)
+Does what you expect.  Run it while you are sitting in the root of a project (where the tiapp.xml is.)  **Lots of prereqs, though. No instructions as of yet.**
 
 ### ti_android_device.py
 
