@@ -3,9 +3,9 @@ import zipfile, os, sys
 import json, urllib
 
 
-TI_CLOUD = ("2.0.5", "2.1.0") # old versus new
+TI_CLOUD = ("2.1.0", "2.2.0") # old versus new
 TI_CLOUD_PUSH = ("2.0.5", "2.0.5") # old versus new
-SDK_VER = ("2.0.2.GA", "2.1.0") # old versus new
+SDK_VER = ("2.1.0.GA", "2.1.1") # old versus new
 
 """
 Steps:
@@ -18,7 +18,7 @@ and new zip files. If anything looks funny, investigate.
 * If everything looks good, give the three newer .bom files to QE.
 """
 
-DIR = "/Users/bill/tmp"
+DIR = "/Users/bill/tmp/compare"
 PLATFORMS = ("osx", "win32", "linux")
 REL_LIST_URL = "http://api.appcelerator.net/p/v1/release-list"
 
