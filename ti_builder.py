@@ -96,9 +96,13 @@ if command in ['emulator', 'simulator', 'install']:
 if command == 'distribute':
 	if len(sys.argv) < 6:
 		error('"distribute" requires at least 4 args:\n\tti_builder.py distribute <keystore> <password> <alias> <output dir> [<avd id>]')
-	args.extend(sys.argv[2:])
-	if len(sys.argv) == 6:
-		args.append(avdID)
+	keystore = os.path.abspath(os.path.expanduser(sys.argv[2]))
+	password = sys.argv[3]
+	if password == "prompt":
+		password = raw_input("Keystore password: ")
+	alias = sys.argv[4]
+	output_dir = os.path.abspath(os.path.expanduser(sys.argv[5]))
+	args.extend([keystore, password, alias, output_dir])
 
 print '%s' % subprocess.list2cmdline(args)
 os.execv(sys.executable, args)
