@@ -213,7 +213,7 @@ if os.path.exists(template_folder):
 			print 'You selected the "%s" template' % template
 			template_folder = os.path.join(template_folder, template)
 			if simulation:
-				print "SIMULATION - Would copy files from %s to %s" % (template_folder, resources_folder)
+				print "SIMULATION - Would copy files from %s to %s" % (template_folder, project_folder)
 			else:
 				for root, dirs, files in os.walk(template_folder):
 					for f in files:
@@ -221,7 +221,7 @@ if os.path.exists(template_folder):
 						orig_rel = orig.replace(template_folder,'')
 						if orig_rel.startswith(os.sep):
 							orig_rel = orig_rel[1:]
-						dest = os.path.join(resources_folder, orig_rel)
+						dest = os.path.join(project_folder, orig_rel)
 						if not os.path.exists(os.path.dirname(dest)):
 							os.makedirs(os.path.dirname(dest))
 						print "Copying %s -> %s" % (orig, dest)

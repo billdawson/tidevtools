@@ -3,9 +3,9 @@ import zipfile, os, sys
 import json, urllib
 
 
-TI_CLOUD = ("2.1.0", "2.2.0") # old versus new
-TI_CLOUD_PUSH = ("2.0.5", "2.0.5") # old versus new
-SDK_VER = ("2.1.0.GA", "2.1.1") # old versus new
+TI_CLOUD = ("2.2.0", "2.3.0") # old versus new
+TI_CLOUD_PUSH = ("2.0.5", "2.0.7") # old versus new
+SDK_VER = ("2.1.1.GA", "2.1.2") # old versus new
 
 """
 Steps:
