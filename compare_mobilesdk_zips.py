@@ -3,9 +3,9 @@ import zipfile, os, sys
 import json, urllib
 
 
-TI_CLOUD = ("2.2.0", "2.3.0") # old versus new
-TI_CLOUD_PUSH = ("2.0.5", "2.0.7") # old versus new
-SDK_VER = ("2.1.1.GA", "2.1.2") # old versus new
+TI_CLOUD = ("2.3.0", "2.3.0") # old versus new
+TI_CLOUD_PUSH = ("2.0.7", "2.0.7") # old versus new
+SDK_VER = ("2.1.2.GA", "2.1.3") # old versus new
 
 """
 Steps:
@@ -128,7 +128,7 @@ def compare(platform):
 	check_diffs("new", "old")
 	
 if __name__ == "__main__":
-	get_old_zips()
+	#get_old_zips()
 	write_boms()
 
 	for platform in PLATFORMS:

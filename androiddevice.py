@@ -109,6 +109,7 @@ class AndroidDevice(object):
 		args = self.adb_arg_set()
 		args.extend(("uninstall", package_name))
 		call(args)
+		self.shell_exec("rm -r /sdcard/%s" % package_name, silent=True)
 
 	def shell_exec(self, shell_command, silent=False):
 		args = self.adb_arg_set()
