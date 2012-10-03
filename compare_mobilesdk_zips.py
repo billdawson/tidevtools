@@ -128,7 +128,7 @@ def compare(platform):
 	check_diffs("new", "old")
 	
 if __name__ == "__main__":
-	#get_old_zips()
+	get_old_zips()
 	write_boms()
 
 	for platform in PLATFORMS:
