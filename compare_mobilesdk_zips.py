@@ -1,22 +1,66 @@
 #!/usr/bin/env python
+
+"""
+h1. Preparing Bill of Materials
+h2. Comparing the Candidate with Previous Production Build
+h3. Setting Version Numbers
+
+There are three variables in the python script which you should use
+to identify the version numbers of key components for the release.
+Each of these variables is a two-value tuple.  The left value should
+be the version that is in production.  The right value should be
+the candidate version. Note that for the Mobile SDK itself, you will
+likely need to append ".GA" to the version number because that's how
+we package them when we release to GA.
+
+The three variables are:
+
+* TI_CLOUD -- the cloud module found under support/module/packaged in
+the titanium_mobile source tree.
+* TI_CLOUD_PUSH -- the cloud push module also found under
+support/module/packaged.
+* SDK_VER -- the mobile SDK itself.  For the previous (production) version
+don't forget to include ".GA".
+
+h3. Build the Candidate on a Dev Machine
+
+Build the candidate release by checking out the appropriate branch and
+running "scons package_all=1".  The "package_all" parameter indicates
+that linux, win32 and osx packages should all be built.
+
+h3. Setup a Working Folder
+
+* Create a folder to do the comparison work in.  Set the DIR variable in
+the script to point to that location.
+* Copy the three zip files that you just created above using {{scons}} in to
+this new working folder.
+
+h3. Run the Comparison Script
+
+* In a shell (i.e., Terminal on OSX) session, move to that working
+folder you created above.
+* While sitting in that folder, run {{python compare_mobilesdk_zips.py}}. You
+will need to qualify the path to {{compare_mobilesdk_zips.py}} if it's not
+also sitting in the folder that you are in.
+* The script will run as follows:
+* * It downloads the production release zip files of the version you specified on
+the left side of the SDK_VER variable.
+* * It compares the contents of those production zip files with the contents of
+the candidate zip files.
+* * If there are any differences, it will create a report file named [platform]-results.txt,
+such as {{osx-results.txt}}. Look in those files and if any of the differences "look suspicious",
+contact someone in platform engineering to try to get an explanation for the differences.
+* * It creates three files that are the actual BOMs: mobilesdk-X.X.X-linux.bom,
+mobilesdk-X.X.X-osx.bom and mobilesdk-X.X.X-win32.bom, where "X.X.X" is the candidate version
+number.
+"""
+
 import zipfile, os, sys
 import json, urllib
 
-
 TI_CLOUD = ("2.3.0", "2.3.0") # old versus new
 TI_CLOUD_PUSH = ("2.0.7", "2.0.7") # old versus new
-SDK_VER = ("2.1.2.GA", "2.1.3") # old versus new
-
-"""
-Steps:
-* Fill in the TI_CLOUD, TI_CLOUD_PUSH and SDK_VER lists above.
-* Package all platform zips using "scons package_all=1".
-* Copy the three zip files (under dist/) to the folder indicated by DIR below.
-* Run this file.
-* Look in "osx-results.txt", etc., to see any differences between the contents of the old
-and new zip files. If anything looks funny, investigate.
-* If everything looks good, give the three newer .bom files to QE.
-"""
+SDK_VER = ("2.1.3.GA", "2.1.4") # old versus new
 
 DIR = "/Users/bill/tmp/compare"
 PLATFORMS = ("osx", "win32", "linux")
