@@ -1,7 +1,7 @@
 tidevtools from Bill Dawson (and others)
 ========================================
 
-Includes a script to make a Titanium mobile project, and a script to "eclipsify" a project.
+Includes a script to make a Titanium mobile project, and a script to "eclipsify" a project. And more.
 
 Suggested Steps To Use It
 --------------------------
@@ -42,17 +42,7 @@ That will create a MyProject folder in the folder you specify in the PROJECT_FOL
 
 ### ti_eclipsify.py
 
-**DEPRECATED** -- will not function correctly if you're Titanium SDK source in Eclipse is from 1.8.0 or higher.  Replaced by ti_eclipsify2.py.
-
-Does what you expect.  Run it while you are sitting in the root of a project (where the tiapp.xml is.)
-
-### ti_eclipsify2.py
-
-**DEPRECATED** Does what you expect.  Run it while you are sitting in the root of a project (where the tiapp.xml is.)
-
-### ti_eclipsify3.py
-
-Does what you expect.  Run it while you are sitting in the root of a project (where the tiapp.xml is.)  **Lots of prereqs, though. No instructions as of yet.**
+Prepares an existing Titanium project to be imported into Eclipse so that you can debug Titanium using the app. This script requires quite a bit in the way of preparation.  Please see ti_eclipsify.md for instructions.
 
 ### ti_android_device.py
 
