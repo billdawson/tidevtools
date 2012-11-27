@@ -9,10 +9,89 @@
  * http://github.com/billdawson/tidevtools
  *
  * Just run this script at the top of a project folder.
+ * See ti_eclipsify.md for more details.
 """
-import sys, os, platform, shutil
-from os import environ as env
-from subprocess import call
+
+import sys, os, shutil
+
+# Contents for Eclipse/ADT required project files.
+project_properties="""target=android-8
+apk-configurations=
+android.library.reference.1=../android/titanium
+android.library.reference.2=../android/modules/accelerometer
+android.library.reference.3=../android/modules/analytics
+android.library.reference.4=../android/modules/android
+android.library.reference.5=../android/modules/app
+android.library.reference.6=../android/runtime/common
+android.library.reference.7=../android/runtime/rhino
+android.library.reference.8=../android/runtime/v8
+android.library.reference.9=../android/modules/calendar
+android.library.reference.10=../android/modules/contacts
+android.library.reference.11=../android/modules/database
+android.library.reference.12=../android/modules/facebook
+android.library.reference.13=../android/modules/geolocation
+android.library.reference.14=../android/modules/filesystem
+android.library.reference.15=../android/modules/gesture
+android.library.reference.16=../android/modules/locale
+android.library.reference.17=../android/modules/map
+android.library.reference.18=../android/modules/media
+android.library.reference.19=../android/modules/network
+android.library.reference.20=../android/modules/platform
+android.library.reference.21=../android/modules/ui
+android.library.reference.22=../android/modules/utils
+android.library.reference.23=../android/modules/xml
+android.library.reference.24=../android/modules/yahoo
+"""
+dot_classpath="""<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+  <classpathentry kind="src" path="src"/>
+  <classpathentry kind="src" path="gen"/>
+  <classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+  <classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+  <classpathentry kind="lib" path="/titanium/lib/commons-logging-1.1.1.jar"/>
+  <classpathentry kind="lib" path="/titanium/lib/ti-commons-codec-1.3.jar"/>
+  <classpathentry kind="lib" path="/titanium-dist/lib/kroll-apt.jar"/>
+  <classpathentry kind="lib" path="/titanium-xml/lib/jaxen-1.1.1.jar"/>
+  <classpathentry kind="lib" path="/titanium/lib/android-support-v4.jar"/>
+  <classpathentry kind="lib" path="/titanium/lib/thirdparty.jar"/>
+  <classpathentry kind="lib" path="/kroll-rhino/lib/js.jar" sourcepath="/Users/marshall/Code/rhino_titanium/src"/>
+  <classpathentry kind="output" path="bin/classes"/>
+</classpath>
+"""
+dot_project="""<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>[PROJECT_NAME]</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.android.ide.eclipse.adt.ResourceManagerBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>com.android.ide.eclipse.adt.PreCompilerBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>com.android.ide.eclipse.adt.ApkBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+</projectDescription>
+"""
 
 this_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(this_path)
@@ -22,12 +101,20 @@ except:
 	print >> sys.stderr, "[ERROR] Couldn't load ticommon from %s.  It should be sitting side-by-side with this script.  Message: &%s." % (this_path, err)
 	sys.exit(1)
 
-tisdk = ticommon.find_ti_sdk()[0]
-if not os.path.exists(tisdk):
-	print >> sys.stderr, "[ERROR] Couldn't locate your Titanium Mobile sdk folder.  Please set a TI_DEV_SDK environment variable with the path to the the latest version of the Titanium Mobile SDK."
+############## DEFAULTS ########################
+# Put a file named tidevtools_settings.py in the
+# same folder as this file, then you can override this
+TIMOBILE_SRC = ''
+#################################################
+
+if os.path.exists(os.path.join(this_path, 'tidevtools_settings.py')):
+	execfile(os.path.join(this_path, 'tidevtools_settings.py'))
+
+if not os.path.exists(TIMOBILE_SRC):
+	print >> sys.stderr, "[ERROR] Could not locate the Titanium Mobile SDK sources. Please create a 'tidevtools_settings.py' in the same folder as this script file and add a string variable named TIMOBILE_SRC which is set to the path where the Titanium Mobile SDK sources are located."
 	sys.exit(1)
 
-sys.path.append(os.path.join(tisdk, "android"))
+sys.path.append(os.path.join(TIMOBILE_SRC, "support", "android"))
 from tilogger import *
 log = TiLogger(None, level=TiLogger.INFO)
 
@@ -44,6 +131,7 @@ android_folder = os.path.join('.', 'build', 'android')
 
 assets_folder = os.path.join(android_folder, 'assets')
 bin_assets_folder = os.path.join(android_folder, "bin", "assets")
+libs_folder = os.path.join(android_folder, "libs")
 required_folders = (android_folder,
 		os.path.join(assets_folder),
 		os.path.join(android_folder, "res"),
@@ -54,20 +142,21 @@ for required in required_folders:
 		log.error("You need to build your project one time with Titanium Studio before 'eclipsifying' it.")
 		sys.exit(1)
 
-is_windows = ticommon.is_windows()
+# For V8, copy required native libraries to libs/
+src_libs_dir = os.path.join(TIMOBILE_SRC, "dist", "android", "libs")
+if os.path.exists(src_libs_dir):
+	for root, dirs, files in os.walk(src_libs_dir):
+		for filename in files:
+			full_path = os.path.join(root, filename)
+			rel_path = os.path.relpath(full_path, src_libs_dir)
+			dest_file = os.path.join(os.path.abspath(libs_folder), rel_path)
+			if not os.path.exists(dest_file):
+				if not os.path.exists(os.path.dirname(dest_file)):
+					os.makedirs(os.path.dirname(dest_file))
+				shutil.copyfile(full_path, dest_file)
 
-############## DEFAULTS ########################
-# Put a file named tidevtools_settings.py in the 
-# same folder as this file, then you can override this
-ECLIPSE_PROJ_BOOTSTRAP_PATH = '' # /e.g., /Users/bill/projects/ti_eclipse_project_defaults
-TIMOBILE_SRC = ''
-#################################################
-if os.path.exists(os.path.join(this_path, 'tidevtools_settings.py')):
-	execfile(os.path.join(this_path, 'tidevtools_settings.py'))
 
-# To make sure rhino works, move kroll-rhino-bindings.jar and
-# kroll-rhino-js.jar into libs
-libs_folder = os.path.join(android_folder, "libs")
+# For Rhino, copy required rhino-related JARs to libs/
 if not os.path.exists(libs_folder):
 	os.mkdir(libs_folder)
 rhino_bindings = os.path.join(libs_folder, "kroll-rhino-bindings.jar")
@@ -77,17 +166,11 @@ if not os.path.exists(rhino_bindings):
 if not os.path.exists(rhino_js):
 	shutil.copyfile(os.path.join(TIMOBILE_SRC, "dist", "android", "kroll-rhino-js.jar"), rhino_js)
 
-if (ECLIPSE_PROJ_BOOTSTRAP_PATH is None or len(ECLIPSE_PROJ_BOOTSTRAP_PATH) == 0 or
-		not os.path.exists(ECLIPSE_PROJ_BOOTSTRAP_PATH)):
-	log.error("ECLIPSE_PROJ_BOOTSTRAP_PATH setting not set properly: %s" % ECLIPSE_PROJ_BOOTSTRAP_PATH)
-	sys.exit(1)
-
-appid = ticommon.get_appid('.')
 app_info = ticommon.get_app_info('.')
 appid = app_info["id"]
 project_name = app_info["name"]
 
-gen_folder =os.path.join(android_folder, 'gen', ticommon.appid_to_path(appid))
+gen_folder = os.path.join(android_folder, 'gen', ticommon.appid_to_path(appid))
 if not os.path.exists(gen_folder):
 	os.makedirs(gen_folder)
 
@@ -132,12 +215,11 @@ if appinfo_java:
 	with open(appinfo_java, 'w') as f:
 		f.write("".join(lines_out))
 
-# Remove all code for starting up the debugger.
+# Remove all code for starting up the Javascript debugger.
 if application_java:
 	lines = open(application_java, 'r').readlines()
 	lines = [l for l in lines if "debug" not in l.lower()]
 	open(application_java, "w").write("".join(lines))
-
 
 # if bin/assets/app.json is there, copy it to assets/app.json
 if os.path.exists(os.path.join(bin_assets_folder, "app.json")):
@@ -147,7 +229,7 @@ if os.path.exists(os.path.join(bin_assets_folder, "app.json")):
 if os.path.exists(os.path.join(bin_assets_folder, "index.json")):
 	shutil.copyfile(os.path.join(bin_assets_folder, "index.json"), os.path.join(assets_folder, "index.json"))
 
-if is_windows:
+if ticommon.is_windows():
 	log.info("Copying Resources and tiapp.xml to assets folder because you're running Windows and therefore we're not going to make symlinks")
 	shutil.copytree(resources_folder, os.path.join(assets_folder, 'Resources'))
 	shutil.copy(os.path.join('.', 'tiapp.xml'), assets_folder)
@@ -159,7 +241,7 @@ else:
 	if not os.path.exists(tiapp_dest):
 		os.symlink(os.path.abspath(os.path.join('.', 'tiapp.xml')), tiapp_dest)
 
-# put debuggable=true in manifest so you can do device debugging. 
+# put debuggable=true in Android manifest so you can do device debugging.
 import codecs, re
 f = codecs.open(os.path.join(android_folder, 'AndroidManifest.xml'), 'r', 'utf-8')
 xml = f.read()
@@ -168,22 +250,17 @@ xml = re.sub(r'android\:debuggable="false"', 'android:debuggable="true"', xml)
 f = codecs.open(os.path.join(android_folder, 'AndroidManifest.xml'), 'w', 'utf-8')
 f.write(xml)
 
-# Copy .classpath, .project, default.properties from your bootstrap folder.
-log.trace("Copying .classpath, .project, default.properties from %s" % ECLIPSE_PROJ_BOOTSTRAP_PATH)
-shutil.copyfile(os.path.join(ECLIPSE_PROJ_BOOTSTRAP_PATH, ".classpath"),
-		os.path.join(android_folder, ".classpath"))
-#shutil.copyfile(os.path.join(ECLIPSE_PROJ_BOOTSTRAP_PATH, "default.properties"),
-#		os.path.join(android_folder, "default.properties"))
-shutil.copyfile(os.path.join(ECLIPSE_PROJ_BOOTSTRAP_PATH, ".project"),
-		os.path.join(android_folder, ".project"))
-shutil.copyfile(os.path.join(ECLIPSE_PROJ_BOOTSTRAP_PATH, "project.properties"),
-		os.path.join(android_folder, "project.properties"))
-f = codecs.open(os.path.join(android_folder, '.project'), 'r', 'utf-8')
-project_xml = f.read()
+# Write the required Eclipse/ADT .project, .classpath and project.properties files.
+f = codecs.open(os.path.join(android_folder, ".classpath"), "w")
+f.write(dot_classpath)
 f.close()
-project_xml = project_xml.replace("[PROJECT_NAME]", project_name)
-f = codecs.open(os.path.join(android_folder, '.project'), 'w', 'utf-8')
-f.write(project_xml)
+
+f = codecs.open(os.path.join(android_folder, ".project"), "w")
+f.write(dot_project.replace("[PROJECT_NAME]", project_name))
+f.close()
+
+f = codecs.open(os.path.join(android_folder, "project.properties"), "w")
+f.write(project_properties)
 f.close()
 
 # Fixup Android library project paths in project.properties
@@ -218,15 +295,3 @@ f = codecs.open(props_file, 'w', 'utf-8')
 f.write("".join(newlines))
 f.close()
 
-# Copy required native libraries
-src_libs_dir = os.path.join(TIMOBILE_SRC, "dist", "android", "libs")
-if os.path.exists(src_libs_dir):
-	for root, dirs, files in os.walk(src_libs_dir):
-		for filename in files:
-			full_path = os.path.join(root, filename)
-			rel_path = os.path.relpath(full_path, src_libs_dir)
-			dest_file = os.path.join(os.path.abspath(libs_folder), rel_path)
-			if not os.path.exists(dest_file):
-				if not os.path.exists(os.path.dirname(dest_file)):
-					os.makedirs(os.path.dirname(dest_file))
-				shutil.copyfile(full_path, dest_file)

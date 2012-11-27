@@ -12,47 +12,15 @@ You will need to have the Titanium Mobile SDK sources and be capable of building
 
 Finally, you'll need to have all the titanium projects installed into your Eclipse workspace.  That's not covered here.
 
-## First Time Setup
+## Usage
 
-We need to set up a dummy project and import the Titanium projects into it in Eclipse. Doing this provides us with the .classpath, project.properties, etc., files that our later "eclipsified" projects will need.
-
-1. Use Titanium Studio or the command-line to build and run a Titanium Android project.
-
-2. In Eclipse, choose File -> Import -> Android -> Existing Android Code Into Workspace.
-
-3. Click "Browse" to go find the root directory.
-
-4. Navigate to the build/android folder below your Titanium project folder, and click "Open", then "Finish".  The project will appear as an Android project in your Eclipse workspace. It will have errors -- that's okay.
-
-5. View the project's properties, such as by selecting "Properties" from the context menu or Project -> Properties from the menu.
-
-6. In the Properties navigator, click on Android.
-
-7. On the Android screen for Properties, notice the "Library" section near the bottom.  You'll want to add the "titanium" project, all "titanium-*" and all "kroll-*" projects as Android library projects.  So click "Add" and do that.
-
-8. Create a folder somewhere on your file system (doesn't need to be anywhere related to a titanium project -- can be anywhere.)
-
-9. Copy the .classpath, project.properties and .project files from the build/android folder of the Titanium project you were using above to the new folder.
-
-10. Open your tidevtools_settings.py file and change (or add) the ECLIPSE_PROJ_BOOTSTRAP_PATH variable, setting it to the folder to which you just now copied the .classpath, .project and project.properties files.
-
-11. Open the copy of .project that you put in the new folder, and tokenize the value of the `name` element by making it look like this:
-
-        <name>[PROJECT_NAME]</name>
-
-12. You're ready to go.
-
-## Normal Use
-
-Now that you've set it up, you can use it to eclipsify any Titanium project.  To do so:
-
-1. Build the project at least once (using Ti Studio, CLI, whatever.)
+1. Build your Titanium project at least once (using Titanium Studio, Titanum CLI, whatever.)
 
 2. Run `ti_eclipsify.py` (I like to alias it to `ec`) from the project root folder.
 
-3. In Eclipse, import the project just as you did in steps 2, 3 and 4 in "First Time Setup" above.
+3. Import the project into Eclipse. When importing, please note that the "root" of the project from Eclipse's perspective is the build/android folder below the Titanium project's root.
 
-4. You should now be able to run the project from Eclipse, including running it in debug mode and setting and hitting breakpoints in the Titanium projects.
+4. You should now be able to run the project from Eclipse as an Android app, including running it in debug mode and setting and hitting breakpoints in the Titanium projects.
 
 ## Caveats
 
