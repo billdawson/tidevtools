@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
- * tidevtools 'ti_eclipsify3' - Prepare a Titanium mobile 1.8.0+ project folder
+ * tidevtools 'ti_eclipsify' - Prepare a Titanium mobile 1.8.0+ project folder
  * for importing into Eclipse.
  *
- * Copyright (c) 2010-2011 by Bill Dawson
+ * Copyright (c) 2010-2012 by Bill Dawson
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  * http://github.com/billdawson/tidevtools
@@ -79,7 +79,7 @@ if not os.path.exists(rhino_js):
 
 if (ECLIPSE_PROJ_BOOTSTRAP_PATH is None or len(ECLIPSE_PROJ_BOOTSTRAP_PATH) == 0 or
 		not os.path.exists(ECLIPSE_PROJ_BOOTSTRAP_PATH)):
-	log.error("ECLIPSE_PROJ_BOOTSTRAP_PATH setting not set property: %s" % ECLIPSE_PROJ_BOOTSTRAP_PATH)
+	log.error("ECLIPSE_PROJ_BOOTSTRAP_PATH setting not set properly: %s" % ECLIPSE_PROJ_BOOTSTRAP_PATH)
 	sys.exit(1)
 
 appid = ticommon.get_appid('.')
@@ -186,3 +186,47 @@ f = codecs.open(os.path.join(android_folder, '.project'), 'w', 'utf-8')
 f.write(project_xml)
 f.close()
 
+# Fixup Android library project paths in project.properties
+props_file = os.path.join(android_folder, "project.properties")
+f = codecs.open(props_file, 'r', 'utf-8')
+lines = f.readlines()
+newlines = []
+f.close()
+
+for line in lines:
+	if not line.startswith('android.library.reference'):
+		newlines.append(line)
+		continue
+
+	# Special case: the titanium module is only one folder
+	# down from "android" (other modules are two folders down)
+	titanium_module = "android%stitanium" % os.sep
+	if line.strip().endswith(titanium_module):
+		rel_path = titanium_module
+	else:
+		rel_path = os.sep.join(line.strip().split(os.sep)[-3:])
+	if not rel_path.startswith("android"):
+		newlines.append(line)
+		continue
+	full_path = os.path.join(TIMOBILE_SRC, rel_path)
+	if not os.path.exists(full_path):
+		newlines.append(line)
+		continue
+	newlines.append("%s=%s\n" % (line.split("=")[0], os.path.relpath(full_path, android_folder)))
+
+f = codecs.open(props_file, 'w', 'utf-8')
+f.write("".join(newlines))
+f.close()
+
+# Copy required native libraries
+src_libs_dir = os.path.join(TIMOBILE_SRC, "dist", "android", "libs")
+if os.path.exists(src_libs_dir):
+	for root, dirs, files in os.walk(src_libs_dir):
+		for filename in files:
+			full_path = os.path.join(root, filename)
+			rel_path = os.path.relpath(full_path, src_libs_dir)
+			dest_file = os.path.join(os.path.abspath(libs_folder), rel_path)
+			if not os.path.exists(dest_file):
+				if not os.path.exists(os.path.dirname(dest_file)):
+					os.makedirs(os.path.dirname(dest_file))
+				shutil.copyfile(full_path, dest_file)
