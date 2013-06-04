@@ -13,7 +13,7 @@
 """
 print "tidevtools 'ti_makeproj'"
 
-import sys, os, uuid, re, sqlite3, time, datetime, subprocess, shutil
+import sys, os, uuid, re, time, datetime, subprocess, shutil
 from os import environ as env
 
 ############## DEFAULTS ########################
@@ -56,7 +56,6 @@ def replace_tokens_string(input):
 	return result_list[0]
 
 simulation = False
-no_db = False
 if len(sys.argv) < 2:
 	print "Usage: %s <name>" % os.path.basename(sys.argv[0])
 	sys.exit(1)
@@ -64,7 +63,6 @@ if len(sys.argv) < 2:
 if len(sys.argv) > 2:
 	argstring = ' '.join(sys.argv)
 	simulation = '--simulate' in argstring
-	no_db = '--nodb' in argstring
 
 this_path = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
 
@@ -90,11 +88,6 @@ if os.path.exists(project_folder):
 	sys.exit(1)
 
 isWindows = ticommon.is_windows()
-tidev_db = ticommon.find_ti_dev_db()
-
-if len(tidev_db) == 0:
-	print "I couldn't find your Titanium Developer sqlite db."
-	sys.exit(1)
 
 # Find the Titanium SDK
 tisdk_path, sdkver = ticommon.find_ti_sdk()
@@ -163,31 +156,6 @@ if not simulation:
 	f.close()
 else:
 	print "SIMULATION - Would open the new tiapp.xml file, change the guid,  write out the manifest, etc."
-
-# sqlite
-if not simulation and not no_db:
-	conn = sqlite3.connect(tidev_db)
-	rows = conn.execute('select max(id) from projects')
-	for r in rows:
-		pass
-	dbid = r[0] + 1
-
-	sql = """
-	INSERT INTO projects (id, type, guid, runtime, description, timestamp,
-	name, directory, appid, publisher, url, image, version, copyright)
-	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
-
-	timestamp = time.mktime(time.localtime())
-	copyright = "%s by %s" % (datetime.datetime.now().year, PUBLISHER);
-
-	values = (dbid, 'mobile', guid, sdkver, "No description provided", timestamp,
-			project_name, project_folder, project_id, PUBLISHER, PUBLISHER_URL, 
-			'appicon.png', '1.0', copyright)
-	conn.execute(sql, values)
-	conn.commit()
-	conn.close()
-else:
-	print "SIMULATION - Would create an entry in the Titanium Developer Sqlite database"
 
 # Base the project on a template?
 template_folder = os.path.join(PROJECT_FOLDER, 'templates')

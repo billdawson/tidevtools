@@ -15,7 +15,7 @@
 import sys, os, shutil
 
 # Contents for Eclipse/ADT required project files.
-project_properties="""target=android-8
+project_properties="""target=android-17
 apk-configurations=
 android.library.reference.1=../android/titanium
 android.library.reference.2=../android/modules/accelerometer
@@ -23,38 +23,34 @@ android.library.reference.3=../android/modules/analytics
 android.library.reference.4=../android/modules/android
 android.library.reference.5=../android/modules/app
 android.library.reference.6=../android/runtime/common
-android.library.reference.7=../android/runtime/rhino
-android.library.reference.8=../android/runtime/v8
-android.library.reference.9=../android/modules/calendar
-android.library.reference.10=../android/modules/contacts
-android.library.reference.11=../android/modules/database
-android.library.reference.12=../android/modules/facebook
-android.library.reference.13=../android/modules/geolocation
-android.library.reference.14=../android/modules/filesystem
-android.library.reference.15=../android/modules/gesture
-android.library.reference.16=../android/modules/locale
-android.library.reference.17=../android/modules/map
-android.library.reference.18=../android/modules/media
-android.library.reference.19=../android/modules/network
-android.library.reference.20=../android/modules/platform
-android.library.reference.21=../android/modules/ui
-android.library.reference.22=../android/modules/utils
-android.library.reference.23=../android/modules/xml
-android.library.reference.24=../android/modules/yahoo
+android.library.reference.7=../android/runtime/v8
+android.library.reference.8=../android/modules/calendar
+android.library.reference.9=../android/modules/contacts
+android.library.reference.10=../android/modules/database
+android.library.reference.11=../android/modules/geolocation
+android.library.reference.12=../android/modules/filesystem
+android.library.reference.13=../android/modules/gesture
+android.library.reference.14=../android/modules/locale
+android.library.reference.15=../android/modules/map
+android.library.reference.16=../android/modules/media
+android.library.reference.17=../android/modules/network
+android.library.reference.18=../android/modules/platform
+android.library.reference.19=../android/modules/ui
+android.library.reference.20=../android/modules/utils
+android.library.reference.21=../android/modules/xml
 """
 dot_classpath="""<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
   <classpathentry kind="src" path="src"/>
   <classpathentry kind="src" path="gen"/>
   <classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-  <classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+  <classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
   <classpathentry kind="lib" path="/titanium/lib/commons-logging-1.1.1.jar"/>
   <classpathentry kind="lib" path="/titanium/lib/ti-commons-codec-1.3.jar"/>
   <classpathentry kind="lib" path="/titanium-dist/lib/kroll-apt.jar"/>
   <classpathentry kind="lib" path="/titanium-xml/lib/jaxen-1.1.1.jar"/>
   <classpathentry kind="lib" path="/titanium/lib/android-support-v4.jar"/>
   <classpathentry kind="lib" path="/titanium/lib/thirdparty.jar"/>
-  <classpathentry kind="lib" path="/kroll-rhino/lib/js.jar" sourcepath="/Users/marshall/Code/rhino_titanium/src"/>
   <classpathentry kind="output" path="bin/classes"/>
 </classpath>
 """
@@ -143,6 +139,9 @@ for required in required_folders:
 		sys.exit(1)
 
 # For V8, copy required native libraries to libs/
+if not os.path.exists(libs_folder):
+	os.makedirs(libs_folder)
+""" Apparently not required anymore
 src_libs_dir = os.path.join(TIMOBILE_SRC, "dist", "android", "libs")
 if os.path.exists(src_libs_dir):
 	for root, dirs, files in os.walk(src_libs_dir):
@@ -154,17 +153,7 @@ if os.path.exists(src_libs_dir):
 				if not os.path.exists(os.path.dirname(dest_file)):
 					os.makedirs(os.path.dirname(dest_file))
 				shutil.copyfile(full_path, dest_file)
-
-
-# For Rhino, copy required rhino-related JARs to libs/
-if not os.path.exists(libs_folder):
-	os.mkdir(libs_folder)
-rhino_bindings = os.path.join(libs_folder, "kroll-rhino-bindings.jar")
-rhino_js = os.path.join(libs_folder, "kroll-rhino-js.jar")
-if not os.path.exists(rhino_bindings):
-	shutil.copyfile(os.path.join(TIMOBILE_SRC, "dist", "android", "kroll-rhino-bindings.jar"), rhino_bindings)
-if not os.path.exists(rhino_js):
-	shutil.copyfile(os.path.join(TIMOBILE_SRC, "dist", "android", "kroll-rhino-js.jar"), rhino_js)
+"""
 
 app_info = ticommon.get_app_info('.')
 appid = app_info["id"]
